@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>1022 KPI</title>
+<style>
+:root{--blue:#075b9d;--pale:#dcebf7;--yellow:#fff0a3;--green:#16822b;--red:#b51f32;--ink:#111}
+*{box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;margin:0;background:#f4f4f4;color:var(--ink)}
+.page{max-width:1080px;margin:18px auto;padding:0 12px}
+.toolbar{display:flex;gap:10px;justify-content:flex-end;margin-bottom:10px}
+button{border:0;border-radius:9px;padding:11px 17px;font-size:16px;font-weight:700;background:#e4e4e7;color:#111}
+button.primary{background:var(--blue);color:#fff}
+#capture{background:white;border:1px solid #999;overflow:hidden}
+.title{background:var(--blue);color:#fff;text-align:center;font-size:26px;font-weight:800;padding:8px}
+.meta{display:grid;grid-template-columns:150px 1fr 140px 1fr;background:var(--pale);font-weight:700;align-items:center}
+.meta>div{padding:8px 5px}
+.entry{background:var(--yellow)!important}
+input{width:100%;border:0;background:transparent;text-align:center;font:inherit;font-weight:600;outline:none;padding:3px}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+th,td{text-align:center;padding:8px 4px}
+thead th{background:var(--pale)}
+thead tr:first-child th{font-size:14px;padding-bottom:3px}
+thead tr:last-child th{font-size:13px;padding-top:3px}
+.day{font-weight:500;text-align:right;padding-right:18px}
+tbody tr.total td{background:var(--pale);font-weight:800}
+.total .day{text-align:left}
+.actual-input{background:var(--yellow)}
+.delta.good{color:var(--green)} .delta.bad{color:var(--red)}
+.kpis{display:grid;grid-template-columns:1fr 72px 1fr 72px 1fr}
+.kpi{display:grid;grid-template-rows:31px 44px 31px 44px}
+.kpi h3{margin:0;background:var(--blue);color:#fff;text-align:center;font-size:14px;padding:7px}
+.kpi .value{background:var(--yellow);display:flex;align-items:center;justify-content:center;font-weight:700}
+.spacer{background:#fff}
+.note{text-align:center;font-size:12px;color:#666;margin-top:8px}
+@media(max-width:700px){
+.page{margin:8px auto;padding:0 4px}.toolbar{position:sticky;top:0;z-index:5;background:#f4f4f4;padding:5px 0}
+#capture{min-width:760px;transform-origin:top left}
+.viewport{overflow-x:auto}.meta{grid-template-columns:110px 1fr 100px 1fr}
+}
+</style>
+</head>
+<body>
+<div class="page">
+ <div class="toolbar">
+   <button id="reset">Reset Form</button>
+   <button id="publish" class="primary">Publish</button>
+ </div>
+ <div class="viewport">
+ <section id="capture">
+   <div class="title">KPIs</div>
+   <div class="meta">
+     <div>Store No:</div><div class="entry"><input id="store" inputmode="numeric" pattern="[0-9]*" value="1022"></div>
+     <div>Week No:</div><div class="entry"><input id="week" inputmode="numeric" pattern="[0-9]*" value="38"></div>
+   </div>
+   <table>
+    <thead>
+      <tr><th rowspan="2">Weekly Prod<br>Overview</th><th colspan="2">Units</th><th colspan="2">Total Hours</th><th colspan="2">Net Prod</th></tr>
+      <tr><th>Manager Adjust</th><th>Actual</th><th>Manager Adjust</th><th>Actual</th><th>Plan</th><th>Actual</th></tr>
+    </thead>
+    <tbody id="rows"></tbody>
+    <tbody><tr class="total">
+      <td class="day">Weekly Total</td><td id="planUnitsTotal"></td><td id="unitDelta" class="delta"></td>
+      <td id="planHoursTotal"></td><td id="hourDelta" class="delta"></td>
+      <td id="planProd"></td><td id="actualProd"></td>
+    </tr></tbody>
+   </table>
+   <div class="kpis">
+    <div class="kpi"><h3>CIR</h3><div class="value"><input id="cir" inputmode="decimal" value="-0.85%"></div><h3>Write Offs WTD</h3><div class="value"><input id="writeoffs" inputmode="decimal"></div></div>
+    <div class="spacer"></div>
+    <div class="kpi"><h3>Prod MTD</h3><div class="value"><input id="mtd" inputmode="decimal" value="234"></div><h3>Prod YTD</h3><div class="value"><input id="ytd" inputmode="decimal" value="-2"></div></div>
+    <div class="spacer"></div>
+    <div class="kpi"><h3>Target Prod</h3><div class="value"><input id="target" inputmode="decimal" value="234"></div><h3>Hours to Save</h3><div class="value"><span id="hoursSave"></span></div></div>
+   </div>
+ </section>
+ </div>
+ <div class="note">Publish creates a PNG of the KPI sheet and opens the iPhone share sheet where supported.</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>
+const days=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+const seed=[
+[24121,27708,108,110],[22322,24716,107,118],[23412,23899,115,123],
+[23622,24369,97,114],[30879,26457,107,111],[32766,"",99,""],[19014,"",81,""]
+];
+const rows=document.getElementById("rows");
+days.forEach((d,i)=>{
+ const [pu,au,ph,ah]=seed[i];
+ const tr=document.createElement("tr");
+ tr.innerHTML=`<td class="day">${d}</td>
+ <td><input class="pu" inputmode="numeric" pattern="[0-9]*" value="${pu}"></td>
+ <td class="actual-input"><input class="au" inputmode="numeric" pattern="[0-9]*" value="${au}"></td>
+ <td><input class="ph" inputmode="decimal" value="${ph}"></td>
+ <td class="actual-input"><input class="ah" inputmode="decimal" value="${ah}"></td>
+ <td class="pp"></td><td class="ap"></td>`;
+ rows.appendChild(tr);
+});
+const num=x=>{let n=parseFloat(String(x).replace(/,/g,""));return Number.isFinite(n)?n:0};
+const fmt=(n,d=0)=>n.toLocaleString("en-GB",{minimumFractionDigits:d,maximumFractionDigits:d});
+function recalc(){
+ let PU=0,AU=0,PH=0,AH=0;
+ [...rows.rows].forEach(tr=>{
+  let pu=num(tr.querySelector(".pu").value), au=num(tr.querySelector(".au").value);
+  let ph=num(tr.querySelector(".ph").value), ah=num(tr.querySelector(".ah").value);
+  PU+=pu; AU+=au; PH+=ph; AH+=ah;
+  tr.querySelector(".pp").textContent=ph?fmt(pu/ph,1):"";
+  tr.querySelector(".ap").textContent=(au&&ah)?fmt(au/ah,1):"";
+ });
+ planUnitsTotal.textContent=fmt(PU); planHoursTotal.textContent=fmt(PH,2);
+ let ud=AU-PU, hd=AH-PH;
+ unitDelta.textContent=(ud>=0?"+":"")+fmt(ud); unitDelta.className="delta "+(ud>=0?"good":"bad");
+ hourDelta.textContent=(hd>=0?"+":"")+fmt(hd,2); hourDelta.className="delta "+(hd<=0?"good":"bad");
+ planProd.textContent=PH?fmt(PU/PH,1):"";
+ actualProd.textContent=(AU&&AH)?fmt(AU/AH,1):"";
+ let t=num(target.value), hs=t?AH-(AU/t):0;
+ hoursSave.textContent=(hs>0?"+":"")+fmt(hs,1);
+ hoursSave.style.color=hs<=0?"var(--green)":"var(--red)";
+ localStorage.setItem("kpi1022",JSON.stringify([...document.querySelectorAll("input")].map(x=>[x.id||x.className,x.value])));
+}
+document.addEventListener("input",recalc);
+function restore(){
+ try{
+  const a=JSON.parse(localStorage.getItem("kpi1022")); if(!a)return;
+  const inputs=[...document.querySelectorAll("input")];
+  if(a.length===inputs.length)a.forEach((v,i)=>inputs[i].value=v[1]);
+ }catch(e){}
+}
+reset.onclick=()=>{
+ if(!confirm("Reset the KPI form? This will clear the figures you have entered."))return;
+ [...document.querySelectorAll(".au,.ah,#writeoffs")].forEach(x=>x.value="");
+ recalc();
+};
+publish.onclick=async()=>{
+ const b=publish; b.disabled=true; b.textContent="Creating…";
+ try{
+  const canvas=await html2canvas(document.getElementById("capture"),{scale:2,backgroundColor:"#ffffff",useCORS:true});
+  const blob=await new Promise(r=>canvas.toBlob(r,"image/png"));
+  const file=new File([blob],`KPI-${store.value || "store"}-Week-${week.value || ""}.png`,{type:"image/png"});
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    await navigator.share({files:[file],title:"KPI"});
+  }else{
+    const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=file.name; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  }
+ }catch(e){ if(e.name!=="AbortError") alert("Could not create the KPI image. Please try again."); }
+ finally{b.disabled=false;b.textContent="Publish";}
+};
+restore(); recalc();
+</script>
+</body>
+</html>
