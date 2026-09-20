@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Store</title>
+<style>
+:root{--blue:#075b9d;--pale:#dcebf7;--yellow:#fff0a3;--green:#16822b;--red:#b51f32;--ink:#111}
+*{box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;margin:0;background:#f4f4f4;color:var(--ink)}
+.page{max-width:1080px;margin:18px auto;padding:0 12px}
+.toolbar{display:flex;gap:10px;justify-content:flex-end;margin-bottom:10px}
+button{border:0;border-radius:9px;padding:11px 17px;font-size:16px;font-weight:700;background:#e4e4e7;color:#111}
+button.primary{background:var(--blue);color:#fff}
+#capture{background:white;border:1px solid #999;overflow:hidden}
+.title{background:var(--blue);color:#fff;text-align:center;font-size:26px;font-weight:800;padding:8px}
+.meta{display:grid;grid-template-columns:150px 1fr 140px 1fr;background:var(--pale);font-weight:700;align-items:center}
+.meta>div{padding:8px 5px}
+.entry{background:var(--yellow)!important}
+input{width:100%;border:0;background:transparent;text-align:center;font:inherit;font-weight:600;outline:none;padding:3px}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+th,td{text-align:center;padding:8px 4px}
+thead th{background:var(--pale)}
+thead tr:first-child th{font-size:14px;padding-bottom:3px}
+thead tr:last-child th{font-size:13px;padding-top:3px}
+.day{font-weight:500;text-align:right;padding-right:18px}
+tbody tr.total td{background:var(--pale);font-weight:800}
+.total .day{text-align:left}
+.actual-input{background:var(--yellow)}
+.delta.good{color:var(--green)} .delta.bad{color:var(--red)}
+.kpis{display:grid;grid-template-columns:1fr 72px 1fr 72px 1fr}
+.kpi{display:grid;grid-template-rows:31px 44px 31px 44px}
+.kpi h3{margin:0;background:var(--blue);color:#fff;text-align:center;font-size:14px;padding:7px}
+.kpi .value{background:var(--yellow);display:flex;align-items:center;justify-content:center;font-weight:700}
+.spacer{background:#fff}
+.note{text-align:center;font-size:12px;color:#666;margin-top:8px}
+@media(max-width:700px){
+.page{margin:8px auto;padding:0 4px}.toolbar{position:sticky;top:0;z-index:5;background:#f4f4f4;padding:5px 0}
+#capture{min-width:760px;transform-origin:top left}
+.viewport{overflow-x:auto}.meta{grid-template-columns:110px 1fr 100px 1fr}
+}
+
+/* Built-in KPI keypad: avoids the iOS software keyboard entirely */
+body.pad-open{padding-bottom:390px}
+#fastpad{display:none;position:fixed;touch-action:manipulation;-webkit-user-select:none;user-select:none;left:0;right:0;bottom:0;z-index:2147483647;background:#e9ecf1;padding:10px max(10px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));box-shadow:0 -4px 18px #0003}
+#fastpad.show{display:block}
+.padnav{display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:8px;margin-bottom:8px}
+.padgrid{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)!important;gap:8px}
+.padgrid>button{width:100%!important;grid-column:auto!important}
+.padbottom{display:grid!important;grid-template-columns:2fr .75fr .75fr 1fr!important;gap:8px;margin-top:8px}
+.padbottom>button{width:100%!important;grid-column:auto!important}
+#fastpad button{min-height:58px;touch-action:manipulation;-webkit-user-select:none;user-select:none;border-radius:13px;background:#fff;font-size:27px;font-weight:800;box-shadow:0 1px 3px #0002}
+#fastpad .nav{min-height:44px;font-size:15px}
+#fastpad .done{background:var(--blue);color:#fff}
+#fastpad .op{font-size:30px}
+#fastpad .zero{grid-column:auto!important}
+#fastpad .enter{font-size:38px;line-height:1}
+input.pad-active{box-shadow:inset 0 0 0 3px #1687e8;border-radius:4px}
+
+</style>
+</head>
+<body>
+<div class="page">
+ <div class="toolbar">
+   <button id="reset">Reset Form</button>
+   <button id="publish" class="primary">Publish</button>
+ </div>
+ <div class="viewport">
+ <section id="capture">
+   <div class="title">KPIs</div>
+   <div class="meta">
+     <div>Store No:</div><div class="entry"><input id="store" inputmode="numeric" pattern="[0-9]*" value=""></div>
+     <div>Week No:</div><div class="entry"><input id="week" inputmode="numeric" pattern="[0-9]*" value=""></div>
+   </div>
+   <table>
+    <thead>
+      <tr><th rowspan="2">Weekly Prod<br>Overview</th><th colspan="2">Units</th><th colspan="2">Total Hours</th><th colspan="2">Net Prod</th></tr>
+      <tr><th>Manager Adjust</th><th>Actual</th><th>Manager Adjust</th><th>Actual</th><th>Plan</th><th>Actual</th></tr>
+    </thead>
+    <tbody id="rows"></tbody>
+    <tbody><tr class="total">
+      <td class="day">Weekly Total</td><td id="planUnitsTotal"></td><td id="unitDelta" class="delta"></td>
+      <td id="planHoursTotal"></td><td id="hourDelta" class="delta"></td>
+      <td id="planProd"></td><td id="actualProd"></td>
+    </tr></tbody>
+   </table>
+   <div class="kpis">
+    <div class="kpi"><h3>CIR</h3><div class="value"><input id="cir" inputmode="decimal" value=""></div><h3>Write Offs WTD</h3><div class="value"><input id="writeoffs" inputmode="decimal"></div></div>
+    <div class="spacer"></div>
+    <div class="kpi"><h3>Prod MTD</h3><div class="value"><input id="mtd" inputmode="decimal" value=""></div><h3>Prod YTD</h3><div class="value"><input id="ytd" inputmode="decimal" value=""></div></div>
+    <div class="spacer"></div>
+    <div class="kpi"><h3>Target Prod</h3><div class="value"><input id="target" inputmode="decimal" value=""></div><h3>Hours to Save</h3><div class="value"><span id="hoursSave"></span></div></div>
+   </div>
+ </section>
+ </div>
+ <div class="note">Publish creates a PNG of the KPI sheet and opens the iPhone share sheet where supported.</div>
+</div>
+
+<div id="fastpad" aria-label="KPI keypad">
+  <div class="padnav">
+    <button type="button" class="nav" data-action="prev">‹ Previous</button>
+    <button type="button" class="nav" data-action="next">Next ›</button>
+    <button type="button" class="nav done" data-action="done">Done</button>
+  </div>
+  <div class="padgrid">
+    <button type="button" data-key="7">7</button><button type="button" data-key="8">8</button><button type="button" data-key="9">9</button><button type="button" data-action="back">⌫</button>
+    <button type="button" data-key="4">4</button><button type="button" data-key="5">5</button><button type="button" data-key="6">6</button><button type="button" class="op" data-key="-">−</button>
+    <button type="button" data-key="1">1</button><button type="button" data-key="2">2</button><button type="button" data-key="3">3</button><button type="button" class="op" data-key="+">+</button>
+  </div>
+  <div class="padbottom">
+    <button type="button" class="zero" data-key="0">0</button><button type="button" data-key=".">.</button><button type="button" class="op" data-key="%">%</button><button type="button" class="enter" data-action="enter" aria-label="Enter">↵</button>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>
+const days=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+const seed=days.map(()=>["","","",""]);
+const rows=document.getElementById("rows");
+days.forEach((d,i)=>{
+ const [pu,au,ph,ah]=seed[i];
+ const tr=document.createElement("tr");
+ tr.innerHTML=`<td class="day">${d}</td>
+ <td><input class="pu" inputmode="numeric" pattern="[0-9]*" value="${pu}"></td>
+ <td class="actual-input"><input class="au" inputmode="numeric" pattern="[0-9]*" value="${au}"></td>
+ <td><input class="ph" inputmode="decimal" value="${ph}"></td>
+ <td class="actual-input"><input class="ah" inputmode="decimal" value="${ah}"></td>
+ <td class="pp"></td><td class="ap"></td>`;
+ rows.appendChild(tr);
+});
+const num=x=>{let n=parseFloat(String(x).replace(/,/g,""));return Number.isFinite(n)?n:0};
+const hourNum=inp=>{const raw=(inp?.dataset?.rawHour ?? inp?.value ?? "");return num(String(raw).replace("%",""));};
+const fmt=(n,d=0)=>n.toLocaleString("en-GB",{minimumFractionDigits:d,maximumFractionDigits:d});
+function recalc(){
+ let PU=0,PH=0, liveU=0,liveH=0, enteredU=0,enteredH=0;
+ [...rows.rows].forEach(tr=>{
+  const auRaw=tr.querySelector(".au").value.trim();
+  const ahRaw=tr.querySelector(".ah").value.trim();
+  let pu=num(tr.querySelector(".pu").value), au=num(auRaw);
+  const phInp=tr.querySelector(".ph"), ahInp=tr.querySelector(".ah");
+  let ph=hourNum(phInp), ah=hourNum(ahInp);
+  PU+=pu; PH+=ph;
+  liveU += auRaw!=="" ? au : pu;
+  liveH += ahRaw!=="" ? ah : ph;
+  if(auRaw!=="") enteredU++;
+  if(ahRaw!=="") enteredH++;
+  const pp=ph?pu/ph:null;
+  const ap=(auRaw!=="" && ahRaw!=="" && ah)?au/ah:null;
+  tr.querySelector(".pp").textContent=pp!==null?fmt(pp,1):"";
+  const apCell=tr.querySelector(".ap");
+  apCell.textContent=ap!==null?fmt(ap,1):"";
+  // Daily Actual Prod stays neutral; colour is used only for the weekly total.
+  apCell.style.color="";
+ });
+ // Weekly totals are the live week: use Actual where entered, otherwise Manager Adjust.
+ planUnitsTotal.textContent=PU?fmt(PU):""; planHoursTotal.textContent=PH?fmt(PH,2):"";
+ // Coloured figures are the live-week difference against the original Manager Adjust week.
+ let ud=liveU-PU, hd=liveH-PH;
+ unitDelta.textContent=enteredU ? (ud>=0?"+":"")+fmt(ud) : "";
+ unitDelta.className="delta "+(enteredU?(ud>=0?"good":"bad"):"");
+ hourDelta.textContent=enteredH ? (hd>=0?"+":"")+fmt(hd,2) : "";
+ hourDelta.className="delta "+(enteredH?(hd<=0?"good":"bad"):"");
+ // Weekly Net Prod = weekly units divided by weekly hours.
+ planProd.textContent=(PH&&PU)?fmt(PU/PH,1):"";
+ // Actual weekly prod only uses days where BOTH actual units and actual hours exist.
+ let actualUnitsMatched=0, actualHoursMatched=0, matchedDays=0;
+ [...rows.rows].forEach(tr=>{
+   const ur=tr.querySelector(".au").value.trim(), hr=tr.querySelector(".ah").value.trim();
+   if(ur!=="" && hr!=="" && num(hr)){actualUnitsMatched+=num(ur);actualHoursMatched+=num(hr);matchedDays++;}
+ });
+ const weeklyPlan=(PH&&PU)?PU/PH:null;
+ const weeklyActual=(matchedDays&&actualHoursMatched)?actualUnitsMatched/actualHoursMatched:null;
+ actualProd.textContent=weeklyActual!==null?fmt(weeklyActual,1):"";
+ actualProd.style.color=weeklyActual===null||weeklyPlan===null?"":(weeklyActual>=weeklyPlan?"var(--green)":"var(--red)");
+ let t=num(target.value), hs=(t&&PU&&PH)?PH-(PU/t):null;
+ hoursSave.textContent=hs===null?"":(hs>0?"+":"")+fmt(hs,1);
+ hoursSave.style.color=hs===null?"":(hs<=0?"var(--green)":"var(--red)");
+ localStorage.setItem("kpi1022",JSON.stringify([...document.querySelectorAll("input")].map(x=>[x.id||x.className,x.value,x.dataset.rawHour||""])));
+}
+document.addEventListener("input",recalc);
+function restore(){
+ try{
+  const a=JSON.parse(localStorage.getItem("kpi1022")); if(!a)return;
+  const inputs=[...document.querySelectorAll("input")];
+  if(a.length===inputs.length)a.forEach((v,i)=>{inputs[i].value=v[1]; if(v[2]) inputs[i].dataset.rawHour=v[2];});
+ }catch(e){}
+}
+reset.onclick=()=>{
+ if(!confirm("Reset the entire KPI form?"))return;
+ [...document.querySelectorAll("input")].forEach(x=>x.value="");
+ localStorage.removeItem("kpi1022");
+ recalc();
+};
+store.addEventListener("input",()=>{
+  const n=(store.value||"").trim();
+  document.title=n || "Store";
+});
+
+publish.onclick=async()=>{
+ const b=publish; b.disabled=true; b.textContent="Creating…";
+ try{
+  const canvas=await html2canvas(document.getElementById("capture"),{scale:2,backgroundColor:"#ffffff",useCORS:true});
+  const blob=await new Promise(r=>canvas.toBlob(r,"image/png"));
+  const storeNo=(store.value || "").trim();
+  const shareName=storeNo || "Store";
+  // iOS/WhatsApp can use the page title as the share label, so keep it
+  // identical to the store number as well as the file/share metadata.
+  document.title=shareName;
+  const file=new File([blob],`${shareName}.png`,{type:"image/png"});
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    await navigator.share({files:[file],title:shareName,text:shareName});
+  }else{
+    const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=file.name; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  }
+ }catch(e){ if(e.name!=="AbortError") alert("Could not create the KPI image. Please try again."); }
+ finally{b.disabled=false;b.textContent="Publish";}
+};
+
+// Built-in keypad. Inputs are readonly so iOS never opens its software keyboard.
+const fastpad=document.getElementById('fastpad');
+let activeInput=null;
+const editableInputs=()=>[...document.querySelectorAll('input')];
+function isHours(inp){return inp && (inp.classList.contains('ph')||inp.classList.contains('ah'));}
+function finishHour(inp){
+  if(!isHours(inp))return;
+  const raw=inp.value.trim();
+  if(raw===''){delete inp.dataset.rawHour;return;}
+  const n=parseFloat(raw.replace('%',''));
+  if(Number.isFinite(n)){
+    // Keep the exact decimal for all calculations, but show a rounded whole hour.
+    inp.dataset.rawHour=String(n);
+    inp.value=String(Math.round(n));
+    inp.dispatchEvent(new Event('input',{bubbles:true}));
+  }
+}
+function selectInput(inp){
+  if(!inp)return;
+  if(activeInput && activeInput!==inp){finishHour(activeInput);activeInput.classList.remove('pad-active');}
+  activeInput=inp;
+  // When an hours cell is reopened, edit its exact value rather than the rounded display.
+  if(isHours(inp) && inp.dataset.rawHour) inp.value=inp.dataset.rawHour;
+  inp.classList.add('pad-active');
+  fastpad.classList.add('show'); document.body.classList.add('pad-open');
+  setTimeout(()=>inp.scrollIntoView({block:'center',behavior:'smooth'}),30);
+}
+function closePad(){
+  if(activeInput){finishHour(activeInput);activeInput.classList.remove('pad-active');}
+  activeInput=null;fastpad.classList.remove('show');document.body.classList.remove('pad-open');
+}
+editableInputs().forEach(inp=>{
+  inp.readOnly=true;
+  inp.removeAttribute('inputmode');
+  inp.setAttribute('aria-haspopup','true');
+  inp.addEventListener('click',e=>{e.preventDefault();selectInput(inp);});
+  inp.addEventListener('pointerdown',e=>{e.preventDefault();selectInput(inp);});
+});
+function fire(){activeInput?.dispatchEvent(new Event('input',{bubbles:true}));}
+function insertKey(k){
+  if(!activeInput)return;
+  let v=activeInput.value;
+  if(k==='-'){activeInput.value=v.startsWith('-')?v.slice(1):'-'+v.replace(/^\+/,'');}
+  else if(k==='+'){activeInput.value=v.startsWith('+')?v.slice(1):'+'+v.replace(/^-/,'');}
+  else if(k==='%'){if(!v.endsWith('%'))activeInput.value=v+'%';}
+  else if(k==='.'){
+    const core=v.replace(/[+\-%]/g,''); if(!core.includes('.'))activeInput.value=v+(v===''?'0.':'.');
+  } else {
+    const pct=v.endsWith('%'); if(pct)v=v.slice(0,-1);
+    activeInput.value=v+k+(pct?'%':'');
+  }
+  fire();
+}
+function move(dir){
+  if(!activeInput)return;
+  finishHour(activeInput);
+  const a=editableInputs(),i=a.indexOf(activeInput),n=a[Math.max(0,Math.min(a.length-1,i+dir))];
+  selectInput(n);
+}
+// Stop iPhone Safari treating rapid keypad taps as a double-tap zoom gesture.
+fastpad.addEventListener('dblclick',e=>e.preventDefault());
+fastpad.addEventListener('touchend',e=>{
+  if(e.target.closest('button')) e.preventDefault();
+},{passive:false});
+
+fastpad.addEventListener('pointerdown',e=>{
+  const b=e.target.closest('button');if(!b)return;e.preventDefault();
+  if(b.dataset.key!==undefined)insertKey(b.dataset.key);
+  else if(b.dataset.action==='back'&&activeInput){activeInput.value=activeInput.value.slice(0,-1);fire();}
+  else if(b.dataset.action==='prev')move(-1);
+  else if(b.dataset.action==='next')move(1);
+  else if(b.dataset.action==='enter'){
+    // Enter follows the work-entry sequence vertically by column:
+    // Manager Adjust Units (Mon-Sun) → Manager Adjust Hours (Mon-Sun)
+    // → Actual Units (Mon-Sun) → Actual Hours (Mon-Sun), then the KPI fields.
+    if(activeInput){
+      finishHour(activeInput);
+      const order=[
+        ...document.querySelectorAll('.pu'),
+        ...document.querySelectorAll('.ph'),
+        ...document.querySelectorAll('.au'),
+        ...document.querySelectorAll('.ah'),
+        document.getElementById('cir'),document.getElementById('writeoffs'),
+        document.getElementById('mtd'),document.getElementById('ytd'),document.getElementById('target')
+      ].filter(Boolean);
+      const i=order.indexOf(activeInput);
+      if(i>=0 && i<order.length-1) selectInput(order[i+1]);
+      else closePad();
+    }
+  }
+  else if(b.dataset.action==='done')closePad();
+});
+
+restore(); recalc();
+</script>
+</body>
+</html>
