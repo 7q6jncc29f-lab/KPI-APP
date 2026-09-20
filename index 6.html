@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>1022 KPI</title>
+<style>
+:root{--blue:#075b9d;--pale:#dcebf7;--yellow:#fff0a3;--green:#16822b;--red:#b51f32;--ink:#111}
+*{box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;margin:0;background:#f4f4f4;color:var(--ink)}
+.page{max-width:1080px;margin:18px auto;padding:0 12px}
+.toolbar{display:flex;gap:10px;justify-content:flex-end;margin-bottom:10px}
+button{border:0;border-radius:9px;padding:11px 17px;font-size:16px;font-weight:700;background:#e4e4e7;color:#111}
+button.primary{background:var(--blue);color:#fff}
+#capture{background:white;border:1px solid #999;overflow:hidden}
+.title{background:var(--blue);color:#fff;text-align:center;font-size:26px;font-weight:800;padding:8px}
+.meta{display:grid;grid-template-columns:150px 1fr 140px 1fr;background:var(--pale);font-weight:700;align-items:center}
+.meta>div{padding:8px 5px}
+.entry{background:var(--yellow)!important}
+input{width:100%;border:0;background:transparent;text-align:center;font:inherit;font-weight:600;outline:none;padding:3px}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+th,td{text-align:center;padding:8px 4px}
+thead th{background:var(--pale)}
+thead tr:first-child th{font-size:14px;padding-bottom:3px}
+thead tr:last-child th{font-size:13px;padding-top:3px}
+.day{font-weight:500;text-align:right;padding-right:18px}
+tbody tr.total td{background:var(--pale);font-weight:800}
+.total .day{text-align:left}
+.actual-input{background:var(--yellow)}
+.delta.good{color:var(--green)} .delta.bad{color:var(--red)}
+.kpis{display:grid;grid-template-columns:1fr 72px 1fr 72px 1fr}
+.kpi{display:grid;grid-template-rows:31px 44px 31px 44px}
+.kpi h3{margin:0;background:var(--blue);color:#fff;text-align:center;font-size:14px;padding:7px}
+.kpi .value{background:var(--yellow);display:flex;align-items:center;justify-content:center;font-weight:700}
+.spacer{background:#fff}
+.note{text-align:center;font-size:12px;color:#666;margin-top:8px}
+@media(max-width:700px){
+.page{margin:8px auto;padding:0 4px}.toolbar{position:sticky;top:0;z-index:5;background:#f4f4f4;padding:5px 0}
+#capture{min-width:760px;transform-origin:top left}
+.viewport{overflow-x:auto}.meta{grid-template-columns:110px 1fr 100px 1fr}
+}
+
+/* Fast iPhone number pad */
+#fastpad{display:none;position:fixed;left:0;right:0;bottom:0;z-index:50;background:#eef1f5;padding:8px 10px calc(8px + env(safe-area-inset-bottom));box-shadow:0 -4px 18px #0002}
+#fastpad.show{display:block}.padtools,.padgrid{display:grid;gap:7px}.padtools{grid-template-columns:1fr 1fr 1fr 1fr;margin-bottom:7px}.padgrid{grid-template-columns:repeat(4,1fr)}
+#fastpad button{border:0;border-radius:10px;background:white;font-size:24px;font-weight:700;min-height:50px}.padtools button{font-size:15px;background:#d8dde5}.padtools .clear{background:#f2c9cd}.padgrid .done{background:#18a44b;color:white}.padgrid .back{background:#d8dde5}
+body.padopen{padding-bottom:330px}
+</style>
+</head>
+<body>
+<div class="page">
+ <div class="toolbar">
+   <button id="reset">Reset Form</button>
+   <button id="publish" class="primary">Publish</button>
+ </div>
+ <div class="viewport">
+ <section id="capture">
+   <div class="title">KPIs</div>
+   <div class="meta">
+     <div>Store No:</div><div class="entry"><input id="store" inputmode="numeric" pattern="[0-9]*" value="1022"></div>
+     <div>Week No:</div><div class="entry"><input id="week" inputmode="numeric" pattern="[0-9]*" value="38"></div>
+   </div>
+   <table>
+    <thead>
+      <tr><th rowspan="2">Weekly Prod<br>Overview</th><th colspan="2">Units</th><th colspan="2">Total Hours</th><th colspan="2">Net Prod</th></tr>
+      <tr><th>Manager Adjust</th><th>Actual</th><th>Manager Adjust</th><th>Actual</th><th>Plan</th><th>Actual</th></tr>
+    </thead>
+    <tbody id="rows"></tbody>
+    <tbody><tr class="total">
+      <td class="day">Weekly Total</td><td id="planUnitsTotal"></td><td id="unitDelta" class="delta"></td>
+      <td id="planHoursTotal"></td><td id="hourDelta" class="delta"></td>
+      <td id="planProd"></td><td id="actualProd"></td>
+    </tr></tbody>
+   </table>
+   <div class="kpis">
+    <div class="kpi"><h3>CIR</h3><div class="value"><input id="cir" inputmode="decimal" value="-0.85%"></div><h3>Write Offs WTD</h3><div class="value"><input id="writeoffs" inputmode="decimal"></div></div>
+    <div class="spacer"></div>
+    <div class="kpi"><h3>Prod MTD</h3><div class="value"><input id="mtd" inputmode="decimal" value="234"></div><h3>Prod YTD</h3><div class="value"><input id="ytd" inputmode="decimal" value="-2"></div></div>
+    <div class="spacer"></div>
+    <div class="kpi"><h3>Target Prod</h3><div class="value"><input id="target" inputmode="decimal" value="234"></div><h3>Hours to Save</h3><div class="value"><span id="hoursSave"></span></div></div>
+   </div>
+ </section>
+ </div>
+ <div class="note">Publish creates a PNG of the KPI sheet and opens the iPhone share sheet where supported.</div>
+</div>
+
+<div id="fastpad" aria-label="Number pad"><div class="padtools"><button type="button" data-act="prev">Previous</button><button type="button" data-act="next">Next</button><button type="button" class="clear" data-act="clear">Clear</button><button type="button" data-act="close">Done</button></div><div class="padgrid"><button type="button" data-key="7">7</button><button type="button" data-key="8">8</button><button type="button" data-key="9">9</button><button type="button" class="back" data-act="back">⌫</button><button type="button" data-key="4">4</button><button type="button" data-key="5">5</button><button type="button" data-key="6">6</button><button type="button" data-key=".">.</button><button type="button" data-key="1">1</button><button type="button" data-key="2">2</button><button type="button" data-key="3">3</button><button type="button" data-key="-">−</button><button type="button" data-key="0">0</button><button type="button" data-key="00">00</button><button type="button" class="done" data-act="close" style="grid-column:span 2">Done</button></div></div>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>
+const days=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+const seed=[
+[24121,27708,108,110],[22322,24716,107,118],[23412,23899,115,123],
+[23622,24369,97,114],[30879,26457,107,111],[32766,"",99,""],[19014,"",81,""]
+];
+const rows=document.getElementById("rows");
+days.forEach((d,i)=>{
+ const [pu,au,ph,ah]=seed[i];
+ const tr=document.createElement("tr");
+ tr.innerHTML=`<td class="day">${d}</td>
+ <td><input class="pu" inputmode="numeric" pattern="[0-9]*" value="${pu}"></td>
+ <td class="actual-input"><input class="au" inputmode="numeric" pattern="[0-9]*" value="${au}"></td>
+ <td><input class="ph" inputmode="decimal" value="${ph}"></td>
+ <td class="actual-input"><input class="ah" inputmode="decimal" value="${ah}"></td>
+ <td class="pp"></td><td class="ap"></td>`;
+ rows.appendChild(tr);
+});
+const num=x=>{let n=parseFloat(String(x).replace(/,/g,""));return Number.isFinite(n)?n:0};
+const fmt=(n,d=0)=>n.toLocaleString("en-GB",{minimumFractionDigits:d,maximumFractionDigits:d});
+function recalc(){
+ let PU=0,PH=0, liveU=0,liveH=0, enteredU=0,enteredH=0;
+ [...rows.rows].forEach(tr=>{
+  const auRaw=tr.querySelector(".au").value.trim();
+  const ahRaw=tr.querySelector(".ah").value.trim();
+  let pu=num(tr.querySelector(".pu").value), au=num(auRaw);
+  let ph=num(tr.querySelector(".ph").value), ah=num(ahRaw);
+  PU+=pu; PH+=ph;
+  liveU += auRaw!=="" ? au : pu;
+  liveH += ahRaw!=="" ? ah : ph;
+  if(auRaw!=="") enteredU++;
+  if(ahRaw!=="") enteredH++;
+  tr.querySelector(".pp").textContent=ph?fmt(pu/ph,1):"";
+  tr.querySelector(".ap").textContent=(auRaw!=="" && ahRaw!=="" && ah)?fmt(au/ah,1):"";
+ });
+ // Weekly totals are the live week: use Actual where entered, otherwise Manager Adjust.
+ planUnitsTotal.textContent=PU?fmt(liveU):""; planHoursTotal.textContent=PH?fmt(liveH,2):"";
+ // Coloured figures are the live-week difference against the original Manager Adjust week.
+ let ud=liveU-PU, hd=liveH-PH;
+ unitDelta.textContent=enteredU ? (ud>=0?"+":"")+fmt(ud) : "";
+ unitDelta.className="delta "+(enteredU?(ud>=0?"good":"bad"):"");
+ hourDelta.textContent=enteredH ? (hd>=0?"+":"")+fmt(hd,2) : "";
+ hourDelta.className="delta "+(enteredH?(hd<=0?"good":"bad"):"");
+ planProd.textContent=(PU&&PH)?fmt(PU/PH,1):"";
+ actualProd.textContent=(enteredU&&enteredH&&liveH)?fmt(liveU/liveH,1):"";
+ let t=num(target.value), hs=(t&&PU&&PH)?PH-(PU/t):null;
+ hoursSave.textContent=hs===null?"":(hs>0?"+":"")+fmt(hs,1);
+ hoursSave.style.color=hs===null?"":(hs<=0?"var(--green)":"var(--red)");
+ localStorage.setItem("kpi1022",JSON.stringify([...document.querySelectorAll("input")].map(x=>[x.id||x.className,x.value])));
+}
+document.addEventListener("input",recalc);
+function restore(){
+ try{
+  const a=JSON.parse(localStorage.getItem("kpi1022")); if(!a)return;
+  const inputs=[...document.querySelectorAll("input")];
+  if(a.length===inputs.length)a.forEach((v,i)=>inputs[i].value=v[1]);
+ }catch(e){}
+}
+reset.onclick=()=>{
+ if(!confirm("Reset the entire KPI form?"))return;
+ [...document.querySelectorAll("input")].forEach(x=>x.value="");
+ localStorage.removeItem("kpi1022");
+ recalc();
+};
+publish.onclick=async()=>{
+ const b=publish; b.disabled=true; b.textContent="Creating…";
+ try{
+  const canvas=await html2canvas(document.getElementById("capture"),{scale:2,backgroundColor:"#ffffff",useCORS:true});
+  const blob=await new Promise(r=>canvas.toBlob(r,"image/png"));
+  const file=new File([blob],`KPI-${store.value || "store"}-Week-${week.value || ""}.png`,{type:"image/png"});
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    await navigator.share({files:[file],title:"KPI"});
+  }else{
+    const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=file.name; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  }
+ }catch(e){ if(e.name!=="AbortError") alert("Could not create the KPI image. Please try again."); }
+ finally{b.disabled=false;b.textContent="Publish";}
+};
+
+// Custom fast number pad: avoids the cluttered iOS spreadsheet keyboard.
+const fastpad=document.getElementById("fastpad"); let activeInput=null;
+const editableInputs=()=>[...document.querySelectorAll('input:not([readonly])')];
+editableInputs().forEach(inp=>{ inp.setAttribute('inputmode','none'); inp.addEventListener('focus',()=>{activeInput=inp;fastpad.classList.add('show');document.body.classList.add('padopen');}); });
+function padInput(text){if(!activeInput)return;let v=activeInput.value;if(text==='.'&&v.includes('.'))return;if(text==='-' ){activeInput.value=v.startsWith('-')?v.slice(1):'-'+v;}else activeInput.value=v+text;activeInput.dispatchEvent(new Event('input',{bubbles:true}));}
+fastpad.addEventListener('pointerdown',e=>{e.preventDefault();const b=e.target.closest('button');if(!b)return;if(b.dataset.key!=null){padInput(b.dataset.key);return;}const act=b.dataset.act;if(act==='back'&&activeInput){activeInput.value=activeInput.value.slice(0,-1);activeInput.dispatchEvent(new Event('input',{bubbles:true}));}if(act==='clear'&&activeInput){activeInput.value='';activeInput.dispatchEvent(new Event('input',{bubbles:true}));}if(act==='close'){fastpad.classList.remove('show');document.body.classList.remove('padopen');activeInput?.blur();}if(act==='prev'||act==='next'){const a=editableInputs(),i=a.indexOf(activeInput),j=act==='next'?Math.min(i+1,a.length-1):Math.max(i-1,0);a[j]?.focus();a[j]?.scrollIntoView({block:'center',behavior:'smooth'});}});
+
+restore(); recalc();
+</script>
+</body>
+</html>
