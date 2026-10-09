@@ -1,0 +1,2777 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>KPI — TEST V1 | Build 1151</title>
+   <link rel="apple-touch-icon" href="5E70CE34-CDF8-4395-B3A3-71760064D3CD.png">
+<link rel="icon" href="5E70CE34-CDF8-4395-B3A3-71760064D3CD.png">
+<style>
+#kpiTestBanner{position:sticky;top:0;z-index:2147483600;background:#b51f32;color:#fff;text-align:center;font-weight:900;font-size:15px;letter-spacing:1.5px;padding:9px 12px;box-shadow:0 2px 6px #0003}
+#kpiTestBanner small{display:block;font-size:11px;letter-spacing:0;font-weight:650;margin-top:2px}
+#rows .field.invalid, #target.invalid{box-shadow:inset 0 0 0 3px #b51f32!important;border-radius:4px;background:#ffe6e6!important}
+
+:root{--blue:#075b9d;--pale:#dcebf7;--yellow:#fff0a3;--green:#16822b;--red:#b51f32;--ink:#111}
+*{box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;margin:0;background:#f4f4f4;color:var(--ink)}
+html,body,*{touch-action:manipulation}
+
+.page{max-width:1080px;margin:18px auto;padding:0 12px}
+.toolbar{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;width:100%;margin-bottom:10px;align-items:stretch}
+.toolbar button{width:100%;min-width:0;min-height:48px;padding:10px 8px;font-size:14px;white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:7px}
+.toolbar .btn-icon{width:19px;height:19px;display:block;flex:0 0 19px}
+.toolbar .btn-label{min-width:0}
+.toolbar button:disabled{opacity:.45}
+button{border:0;border-radius:9px;padding:11px 17px;font-size:16px;font-weight:700;background:#e4e4e7;color:#111}
+button.primary{background:var(--blue);color:#fff}
+body.publish-attempted #store.invalid,body.publish-attempted #week.invalid{box-shadow:inset 0 0 0 3px var(--red);border-radius:4px}
+#capture{background:white;border:1px solid #999;overflow:hidden}
+.title{background:var(--blue);color:#fff;text-align:center;font-size:26px;font-weight:800;padding:8px;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.meta{display:grid;grid-template-columns:150px 1fr 140px 1fr;background:var(--pale);font-weight:700;align-items:center}
+.meta>div{padding:8px 5px}.entry{background:var(--yellow)!important}
+.field{width:100%;min-height:24px;border:0;background:transparent;text-align:center;font:inherit;font-weight:600;outline:none;padding:3px;white-space:nowrap}
+table{width:100%;border-collapse:collapse;table-layout:fixed} th,td{text-align:center;padding:8px 4px}
+thead th{background:var(--pale)} thead tr:first-child th{font-size:14px;padding-bottom:3px} thead tr:last-child th{font-size:13px;padding-top:3px}
+.day{font-weight:500;text-align:right;padding-right:18px;white-space:nowrap;overflow:hidden}
+.day .week-date{font-weight:900;margin-left:5px;white-space:nowrap}
+.day[data-day-index]{border-right:3px solid var(--blue)}
+.day.week-date-on{padding-right:7px}
+
+/* JS assigns all seven column widths together so every hidden mode can coexist. */
+#kpiTable col{width:14.2857%}
+
+#kpiTable.dates-mode .day[data-day-index]{font-size:15px}
+#kpiTable.dates-mode thead tr:nth-child(2) th:nth-child(1){font-size:11px;padding-left:1px;padding-right:1px}
+
+/* Difference cells use one common size per section. JS only shrinks a whole section
+   when necessary, so Monday-Sunday always stay uniform. */
+#kpiTable.units-diff-mode .actual-value-wrap.units-diff-wrap,
+#kpiTable.hours-diff-mode .actual-value-wrap.hours-diff-wrap,
+#kpiTable.prod-diff-mode .actual-value-wrap.prod-diff-wrap{
+  gap:2px;
+  font-size:12px;
+  max-width:100%;
+}
+#kpiTable.units-diff-mode .actual-value-wrap.units-diff-wrap .field,
+#kpiTable.hours-diff-mode .actual-value-wrap.hours-diff-wrap .field{
+  font-size:inherit;
+  min-width:0;
+  padding:1px;
+}
+#kpiTable.prod-diff-mode .actual-value-wrap.prod-diff-wrap .ap,
+#kpiTable.units-diff-mode .actual-value-wrap.units-diff-wrap .day-diff,
+#kpiTable.hours-diff-mode .actual-value-wrap.hours-diff-wrap .day-diff,
+#kpiTable.prod-diff-mode .actual-value-wrap.prod-diff-wrap .day-diff{
+  font-size:inherit;
+}
+.actual-value-wrap.compact-diff{gap:2px;font-size:12px}
+.actual-value-wrap.compact-diff .field{font-size:12px;min-width:0;padding:1px}
+.actual-value-wrap.compact-diff .day-diff{font-size:12px}
+.actual-value-wrap.compact-diff .ap{font-size:12px}#weeklyProdOverview,#unitsActualHeader,#hoursActualHeader,#prodActualHeader{touch-action:manipulation;-webkit-user-select:none;user-select:none;cursor:pointer}
+.actual-value-wrap{display:inline-flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;max-width:100%}
+.actual-value-wrap .field{width:auto;min-width:42px;flex:0 0 auto}
+.day-diff{font-weight:900;white-space:nowrap;font-size:.9em}
+.day-diff.good{color:var(--green)}
+.day-diff.bad{color:var(--red)}
+.hidden-toggle-on{box-shadow:inset 0 -3px 0 var(--blue)} tbody tr.total td{background:var(--pale);font-weight:800}.total .day{text-align:left}
+.actual-input{background:var(--yellow)} .delta.good{color:var(--green)} .delta.bad{color:var(--red)}
+.kpis{
+  display:grid;
+  grid-template-columns:0 0 1fr 72px 1fr;
+  transition:grid-template-columns .18s ease;
+}
+.kpis.legacy-enabled{grid-template-columns:1fr 28px 1fr 28px 1fr}
+.kpi{display:grid;grid-template-rows:31px 44px 31px 44px;min-width:0}
+.kpi h3{margin:0;background:var(--blue);color:#fff;text-align:center;font-size:14px;padding:7px;white-space:nowrap;overflow:hidden}
+.kpi .value{background:var(--yellow);display:flex;align-items:center;justify-content:center;font-weight:700;min-width:0}
+.kpi-spacer{background:#fff;min-width:0;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+#legacyKpi{overflow:hidden;display:grid;grid-template-rows:31px 44px 31px 44px}
+#cirTitle,#woTitle{touch-action:manipulation;-webkit-user-select:none;user-select:none;cursor:pointer}
+.legacy-slot{display:grid;grid-template-rows:31px 44px;min-width:0;visibility:visible}
+#cirSlot{grid-row:1 / 3}
+#woSlot{grid-row:3 / 5}
+.legacy-slot.hidden{visibility:hidden}
+.legacy-slot h3{margin:0;background:var(--blue);color:#fff;text-align:center;font-size:14px;padding:7px;white-space:nowrap;overflow:hidden}
+.legacy-slot .value{background:var(--yellow);display:flex;align-items:center;justify-content:center;font-weight:700;min-width:0}
+#legacySpacer{width:100%}
+.note{text-align:center;font-size:12px;color:#666;margin-top:8px}
+@media(max-width:700px){
+.page{margin:8px auto;padding:0 4px}
+.toolbar{position:sticky;top:0;z-index:5;background:#f4f4f4;padding:5px 0;grid-template-columns:repeat(5,minmax(0,1fr));width:100%}
+.toolbar button{width:100%;min-height:60px;padding:6px 3px;font-size:11px;gap:2px;flex-direction:column;line-height:1.05;overflow:hidden}
+.toolbar .btn-icon{width:19px;height:19px;flex:0 0 19px}
+.toolbar .btn-label{display:block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:clip}
+#capture{min-width:760px;transform-origin:top left}
+.viewport{overflow-x:auto}
+.meta{grid-template-columns:110px 1fr 100px 1fr}
+}
+body.pad-open{padding-bottom:390px}
+/* Figure-entry mode: free the vertical space used by the KPI title and Store/Week strip.
+   Store No. and Week No. keep the header visible while they are being edited. */
+body.pad-open.kpi-entry-mode #capture>.title,
+body.pad-open.kpi-entry-mode #capture>.meta{display:none}
+#fastpad{display:none;position:fixed;touch-action:manipulation;-webkit-user-select:none;user-select:none;left:0;right:0;bottom:0;z-index:2147483647;background:#e9ecf1;padding:10px max(10px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));box-shadow:0 -4px 18px #0003}
+#fastpad.show{display:block}.padnav{display:grid;grid-template-columns:1.15fr 1fr .9fr 1.15fr;gap:8px;margin-bottom:8px}
+.padgrid{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)!important;gap:8px}.padgrid>button{width:100%!important;grid-column:auto!important}
+.padbottom{display:grid!important;grid-template-columns:2fr .85fr 1fr!important;gap:8px;margin-top:8px}.padbottom>button{width:100%!important;grid-column:auto!important}
+#fastpad button{min-height:58px;touch-action:manipulation;-webkit-user-select:none;user-select:none;border-radius:13px;background:#fff;font-size:27px;font-weight:800;box-shadow:0 1px 3px #0002}
+#fastpad .nav{min-height:44px;font-size:13px;padding:6px 5px}#fastpad .done{background:var(--blue);color:#fff}#fastpad .op{font-size:30px}#fastpad .zero{grid-column:auto!important}#fastpad .enter{font-size:38px;line-height:1}
+
+.field.pad-active{box-shadow:inset 0 0 0 3px #1687e8;border-radius:4px}
+
+/* TEST 2: while entering figures, keep the speed controls visible.
+   Hide only Overview / Reset / Publish and expand Undo / Redo to two equal buttons. */
+body.pad-open .toolbar{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+}
+body.pad-open #overview,
+body.pad-open #reset,
+body.pad-open #publish{
+  display:none!important;
+}
+
+/* TEST 1: live context strip above the custom keypad. */
+#entryStatus{
+  background:#fff;
+  border-radius:11px;
+  padding:7px 10px;
+  margin-bottom:7px;
+  box-shadow:0 1px 3px #0002;
+  text-align:left;
+}
+#entryStatusMain{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  font-size:13px;
+  font-weight:900;
+}
+#entryStatusDay{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#entryStatusField{color:var(--blue);white-space:nowrap;text-align:right}
+#entryStatusSub{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-height:17px;
+  margin-top:2px;
+  font-size:12px;
+  font-weight:700;
+  color:#666;
+}
+#entryStatusValue{margin-right:auto;color:#111;font-size:16px;font-weight:900}
+#entryStatusProgress{white-space:nowrap}
+
+/* TEST 3: guide the eye across the currently selected day without recolouring cells. */
+#rows tr.entry-row-active td{
+  box-shadow:inset 0 2px 0 rgba(7,91,157,.32),inset 0 -2px 0 rgba(7,91,157,.32);
+}
+
+/* TEST 4: small non-blocking confirmation for Undo / Redo. */
+#editToast{
+  display:none;
+  position:fixed;
+  left:50%;
+  bottom:max(18px,env(safe-area-inset-bottom));
+  transform:translateX(-50%);
+  z-index:2147483646;
+  max-width:88vw;
+  background:rgba(17,17,17,.92);
+  color:#fff;
+  padding:8px 13px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:800;
+  text-align:center;
+  pointer-events:none;
+  box-shadow:0 3px 12px #0004;
+}
+#editToast.show{display:block}
+body.pad-open #editToast{bottom:calc(395px + env(safe-area-inset-bottom))}
+
+
+#overviewModal{display:none;position:fixed;inset:0;z-index:2147483646;background:#111;padding:0;align-items:center;justify-content:center;overflow:hidden}
+#overviewModal.show{display:flex}
+#overviewCard{position:relative;background:#111;width:100vw;height:100dvh;display:flex;align-items:center;justify-content:center;overflow:hidden;pointer-events:none}
+#overviewClose{
+  position:fixed;
+  right:max(18px,env(safe-area-inset-right));
+  top:max(18px,env(safe-area-inset-top));
+  z-index:2147483647;
+  pointer-events:auto;
+  touch-action:manipulation;
+  -webkit-user-select:none;
+  user-select:none;
+  width:60px;
+  height:60px;
+  padding:0;
+  border:0;
+  border-radius:50%;
+  font-size:36px;
+  line-height:60px;
+  background:#fff;
+  color:#111;
+  box-shadow:0 3px 14px #0008
+}
+#overviewImage{
+  pointer-events:none;
+  display:block;
+  width:auto;
+  height:auto;
+  max-width:none;
+  max-height:none;
+  object-fit:contain;
+  border-radius:4px;
+  transform-origin:center center;
+  will-change:transform,width,height;
+}
+/* Portrait overview is handled by JS by rotating/scaling only the image.
+   The card itself always remains aligned to the viewport. */
+#overviewModal.force-landscape #overviewCard{
+  width:100vw;
+  height:100dvh;
+  transform:none
+}
+#overviewModal.force-landscape #overviewImage{
+  max-width:none;
+  max-height:none;
+}
+
+#extraKpiMenu{display:none;position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.55);padding:20px;align-items:center;justify-content:center}
+#extraKpiMenu.show{display:flex}
+#extraKpiCard{position:relative;background:#fff;border-radius:16px;padding:54px 18px 18px;width:min(360px,100%);box-shadow:0 8px 30px #0006}
+#extraKpiCard h3{margin:0 0 16px;text-align:center;font-size:20px}
+#extraKpiClose{position:absolute;right:10px;top:8px;width:40px;height:40px;padding:0;border-radius:50%;font-size:27px;line-height:40px}
+.extra-kpi-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.extra-kpi-actions button{min-height:52px}
+#toggleCir.active,#toggleWo.active{background:var(--blue);color:#fff}
+#widgetMenu{display:none;position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.55);padding:20px;align-items:center;justify-content:center}
+#widgetMenu.show{display:flex}
+#widgetMenuCard{position:relative;background:#fff;border-radius:16px;padding:54px 18px 18px;width:min(360px,100%);box-shadow:0 8px 30px #0006}
+#widgetMenuCard h3{margin:0 0 14px;text-align:center;font-size:20px}
+#widgetMenuClose{position:absolute;right:10px;top:8px;width:40px;height:40px;padding:0;border-radius:50%;font-size:27px;line-height:40px}
+#adjustWidget{width:100%;background:#16822b;color:#fff}
+
+#prodWidgetModal{display:none;position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.58);padding:18px;align-items:center;justify-content:center}
+#prodWidgetModal.show{display:flex}
+#prodWidgetCard{position:relative;width:min(390px,100%);background:#fff;border-radius:16px;padding:54px 18px 18px;box-shadow:0 8px 30px #0006}
+#prodWidgetCard h3{margin:0 0 16px;text-align:center;font-size:21px;color:var(--ink)}
+#prodWidgetClose{position:absolute;right:10px;top:8px;width:40px;height:40px;padding:0;border-radius:50%;font-size:27px;line-height:40px}
+.prod-widget-grid{display:grid;grid-template-columns:44px 1fr 1fr;gap:8px;align-items:center}
+.prod-widget-grid .hdr{font-size:12px;font-weight:800;color:#666;text-align:center}
+.prod-widget-grid .n{font-size:13px;font-weight:800;text-align:center;color:#666}
+.prod-widget-grid input{width:100%;min-height:42px;border:1px solid #aaa;border-radius:9px;padding:7px 8px;text-align:right;font:inherit;font-size:16px;font-weight:700;background:var(--yellow);outline:none}
+.prod-widget-grid input:focus{box-shadow:0 0 0 3px #1687e8}
+.prod-widget-total{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.prod-widget-totalbox{background:var(--pale);border-radius:10px;padding:9px 10px}
+.prod-widget-totalbox small{display:block;font-size:10px;font-weight:800;color:#666;text-transform:uppercase}
+.prod-widget-totalbox strong{display:block;text-align:right;font-size:18px;margin-top:2px}
+#widgetManualProdWrap{margin-top:8px;background:var(--pale);border-radius:10px;padding:9px 10px}
+#widgetManualProdWrap small{display:block;font-size:10px;font-weight:800;color:#666;text-transform:uppercase}
+#widgetManualProd{font-size:22px;font-weight:900;text-align:right;margin-top:2px}
+
+.prod-widget-editbar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:0 0 12px}
+.prod-widget-editbar button{min-height:40px;padding:8px 6px;font-size:13px}
+.prod-widget-editbar button:disabled{opacity:.45}
+#deleteWidgetProdField{background:#e4e4e7;color:#111}
+#widgetProdTargetWrap{display:grid;grid-template-columns:1fr 145px;gap:10px;align-items:center;margin-top:10px}
+#widgetProdTargetWrap label{font-size:13px;font-weight:800}
+#widgetProdTarget{width:100%;min-height:42px;border:1px solid #aaa;border-radius:9px;padding:7px 8px;text-align:right;font:inherit;font-size:16px;font-weight:700;background:var(--yellow);outline:none}
+#widgetProdTarget:focus{box-shadow:0 0 0 3px #1687e8}
+#widgetHoursSaveWrap{margin-top:10px;border-top:1px solid #ccc;padding-top:10px}
+#widgetHoursSaveWrap small{display:block;font-size:10px;font-weight:800;color:#666;text-transform:uppercase}
+#widgetHoursSave{font-size:24px;font-weight:900;text-align:right;margin-top:2px}
+.prod-widget-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px}
+#grandTotalWidgetProd{background:#16822b;color:#fff}
+#saveWidgetProd{background:var(--blue);color:#fff}
+#clearWidgetProd{background:#e4e4e7;color:#111}
+#prodMtdTitle{touch-action:manipulation;-webkit-user-select:none;user-select:none}
+
+
+
+/* Full-screen paired figure editor — fast-entry test build */
+#planUnitsHeader,#planHoursHeader,#unitsActualHeader,#hoursActualHeader,#storeLabel,#weekLabel{
+  cursor:pointer;
+  -webkit-user-select:none;
+  user-select:none;
+  touch-action:manipulation;
+}
+#capture .field{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#storeLabel,#weekLabel{-webkit-tap-highlight-color:transparent}
+#figureEditor,#weekSetupEditor{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:2147483645;
+  background:#f4f6f8;
+  overflow:auto;
+  -webkit-overflow-scrolling:touch;
+}
+#figureEditor.show,#weekSetupEditor.show{display:block}
+.fe-shell{min-height:100dvh;background:#f4f6f8;color:#111827}
+.fe-topbar{
+  position:sticky;top:0;z-index:3;
+  min-height:76px;
+  padding:calc(12px + env(safe-area-inset-top)) 14px 12px;
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:center;
+  gap:12px;
+  background:#075b9d;
+  color:#fff;
+  box-shadow:0 2px 8px #0002;
+}
+.fe-brand{font-size:22px;font-weight:950;letter-spacing:.2px}
+.fe-meta{text-align:right;font-size:12px;font-weight:850;line-height:1.25}
+.fe-close{
+  min-width:42px;height:42px;padding:0;border-radius:12px;
+  background:#fff;color:#075b9d;font-size:25px;line-height:42px
+}
+.fe-main{width:min(660px,100%);margin:0 auto;padding:16px 12px calc(24px + env(safe-area-inset-bottom))}
+#figureEditor.pad-show .fe-main,#weekSetupEditor.pad-show .fe-main{
+  padding-bottom:calc(470px + env(safe-area-inset-bottom));
+}
+.fe-kicker{
+  margin:0 4px 10px;
+  color:#075b9d;
+  font-size:13px;
+  font-weight:950;
+  letter-spacing:.8px;
+  text-transform:uppercase;
+}
+.fe-card{
+  background:#fff;border-radius:20px;padding:16px;
+  box-shadow:0 6px 24px #0001;
+}
+.fe-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.fe-title-wrap h2{margin:0;font-size:30px;line-height:1;font-weight:950}
+.fe-title-wrap p{margin:7px 0 0;color:#6b7280;font-size:13px;font-weight:750}
+.fe-total-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;min-width:184px}
+.fe-total{border-radius:11px;background:#eef5fb;padding:8px 9px;text-align:center}
+.fe-total small{display:block;color:#6b7280;font-size:9px;font-weight:950;text-transform:uppercase}
+.fe-total strong{display:block;margin-top:3px;color:#075b9d;font-size:16px;font-weight:950;white-space:nowrap}
+.fe-columns,.fe-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 116px 100px;
+  gap:8px;
+  align-items:center;
+}
+.fe-columns{padding:0 10px 6px;color:#6b7280;font-size:10px;font-weight:950;text-transform:uppercase;letter-spacing:.4px}
+.fe-columns span:nth-child(n+2){text-align:center}
+#feRows{display:grid;gap:8px}
+.fe-row{
+  min-height:92px;
+  border:1px solid #dfe4ea;
+  border-radius:14px;
+  padding:8px 10px;
+  background:#f8fafc;
+  transition:border-color .12s ease,background .12s ease,box-shadow .12s ease;
+}
+.fe-row.fe-row-active{
+  border:2px solid #075b9d;
+  background:#eef7ff;
+  box-shadow:0 0 0 3px #075b9d12;
+}
+.fe-day{min-width:0}
+.fe-day strong{display:block;font-size:15px;font-weight:950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fe-date{display:block;margin-top:3px;color:#6b7280;font-size:11px;font-weight:850}
+.fe-plan{display:block;margin-top:4px;color:#526171;font-size:11px;line-height:1.22;font-weight:900;white-space:normal;overflow:visible;text-overflow:clip}
+.fe-input{
+  width:100%;min-width:0;height:50px;
+  border:2px solid #cfd6dd;border-radius:11px;
+  background:#fff;color:#111827;
+  text-align:center;
+  font:inherit;font-size:18px;font-weight:900;
+  outline:none;padding:6px 8px;
+  caret-color:transparent;
+}
+.fe-input:focus,.fe-input.editor-active{border-color:#075b9d;box-shadow:0 0 0 3px #075b9d20}
+.fe-input::placeholder{color:#a5adb7}
+.fe-actions{display:grid;grid-template-columns:1fr 1.35fr;gap:10px;margin-top:14px}
+.fe-actions button{min-height:54px;border-radius:13px;font-size:15px;font-weight:950}
+#feCancel,#setupCancel{background:#e8edf2;color:#111827}
+#feSave,#setupSave{background:#075b9d;color:#fff}
+
+/* Compact Store / Week setup editor */
+#weekSetupEditor .fe-main{width:min(620px,100%)}
+.setup-grid{display:grid;gap:8px}
+.setup-grid.two-col{grid-template-columns:repeat(2,minmax(0,1fr))}
+.setup-field{display:flex;flex-direction:column;align-items:stretch;gap:4px;min-width:0;padding:7px 8px;border:1px solid #dfe4ea;border-radius:12px;background:#f8fafc}
+.setup-field.full{grid-column:1 / -1}
+.setup-field label{font-size:12px;line-height:1.1;font-weight:950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.setup-field .fe-input{height:42px;font-size:17px;min-width:0}
+.setup-value{position:relative;min-width:0}
+.setup-value.percent .fe-input{padding-right:30px}
+.setup-value.percent::after{content:"%";position:absolute;right:11px;top:50%;transform:translateY(-50%);font-size:17px;font-weight:950;color:#526171;pointer-events:none}
+/* When the setup keypad is open, use the whole space above it for the seven fields. */
+#weekSetupEditor.pad-show .fe-topbar,
+#weekSetupEditor.pad-show .fe-kicker,
+#weekSetupEditor.pad-show .fe-title-wrap,
+#weekSetupEditor.pad-show .fe-actions{display:none}
+#weekSetupEditor.pad-show .fe-main{padding:8px 8px calc(458px + env(safe-area-inset-bottom))}
+#weekSetupEditor.pad-show .fe-card{padding:8px;border-radius:14px}
+#weekSetupEditor.pad-show .setup-grid{gap:6px}
+#weekSetupEditor.pad-show .setup-field{padding:5px 6px;gap:3px;border-radius:10px}
+#weekSetupEditor.pad-show .setup-field label{font-size:11px}
+#weekSetupEditor.pad-show .setup-field .fe-input{height:38px;font-size:16px}
+
+/* Dedicated fast keypad for the new editors. The native iPhone keyboard never opens. */
+#editorPad{
+  display:none;
+  position:fixed;
+  left:0;right:0;bottom:0;
+  z-index:2147483647;
+  background:#e9ecf1;
+  padding:8px max(10px,env(safe-area-inset-right)) calc(9px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));
+  box-shadow:0 -5px 22px #0003;
+  touch-action:manipulation;
+  -webkit-user-select:none;
+  user-select:none;
+}
+#editorPad.show{display:block}
+.ep-status{
+  background:#fff;border-radius:12px;padding:7px 10px;margin-bottom:7px;
+  box-shadow:0 1px 3px #0002;
+}
+.ep-status-top{display:flex;align-items:center;gap:8px;min-height:28px}
+#epContext{font-size:12px;font-weight:950;color:#075b9d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+#epUndo{
+  min-height:30px;padding:5px 10px;border-radius:9px;background:#e8edf2;color:#111827;
+  font-size:11px;font-weight:950;
+}
+#epUndo:disabled{opacity:.4}
+.ep-wtd{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:6px}
+.ep-wtd-item{background:#f5f7f9;border-radius:9px;padding:5px 6px;text-align:center;min-width:0}
+.ep-wtd-item small{display:block;color:#6b7280;font-size:8px;font-weight:950;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ep-wtd-item strong{display:block;margin-top:2px;font-size:13px;font-weight:950;white-space:nowrap}
+.ep-wtd-item strong.good{color:#16822b}.ep-wtd-item strong.bad{color:#b51f32}
+#editorPad.setup-mode .ep-wtd{display:none}
+.ep-nav{display:grid;grid-template-columns:1.15fr 1fr .9fr 1.15fr;gap:8px;margin-bottom:8px}
+.ep-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.ep-bottom{display:grid;grid-template-columns:2fr .85fr 1fr;gap:8px;margin-top:8px}
+#editorPad button{
+  min-height:55px;border-radius:13px;background:#fff;color:#111;font-size:25px;font-weight:850;
+  box-shadow:0 1px 3px #0002;
+}
+#editorPad .ep-nav button{min-height:43px;font-size:12px;padding:5px}
+#editorPad .ep-done{background:#075b9d;color:#fff}
+#editorPad .ep-op{font-size:29px}
+#editorPad .ep-enter{font-size:32px}
+#editorPad button:disabled{opacity:.28;box-shadow:none}
+
+@media(max-width:420px){
+  .fe-main{padding-left:8px;padding-right:8px}
+  .fe-card{padding:13px}
+  .fe-head{display:block}
+  .fe-total-grid{margin-top:12px;width:100%;min-width:0}
+  .fe-columns,.fe-row{grid-template-columns:minmax(0,1fr) 104px 88px;gap:6px}
+  .fe-row{padding-left:8px;padding-right:8px}
+  .fe-day strong{font-size:14px}
+  .fe-input{height:48px;font-size:17px;padding:5px}
+  .setup-grid.two-col{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .setup-field{min-width:0}
+  #editorPad button{min-height:52px}
+}
+
+</style></head><body>
+<div id="kpiTestBanner">TEST VERSION — DO NOT USE FOR LIVE REPORTING<small>Build 1151 / V1 • separate saved test data • real site unchanged</small></div>
+<div class="page"><div class="toolbar">
+<button id="overview" aria-label="Overview">
+  <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true">
+    <rect x="3" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="2"/>
+    <rect x="14" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="2"/>
+    <rect x="3" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="2"/>
+    <rect x="14" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="2"/>
+  </svg>
+  <span class="btn-label">Overview</span>
+</button>
+<button id="undo" disabled aria-label="Undo">
+  <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7 4 12l5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 12h8a6 6 0 0 1 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+  <span class="btn-label">Undo</span>
+</button>
+<button id="redo" disabled aria-label="Redo">
+  <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 7 5 5-5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 12h-8a6 6 0 0 0-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+  <span class="btn-label">Redo</span>
+</button>
+<button id="reset" aria-label="Reset form">
+  <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M20 6v5h-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M19 11a7.5 7.5 0 1 0 1 5.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+  </svg>
+  <span class="btn-label">Reset Form</span>
+</button>
+<button id="publish" class="primary" aria-label="Publish and share">
+  <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M12 15V3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <path d="m8 7 4-4 4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M7 10H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  </svg>
+  <span class="btn-label">Publish</span>
+</button>
+</div>
+<div class="viewport"><section id="capture"><div class="title">KPIs</div><div class="meta"><div id="storeLabel">Store No:</div><div class="entry"><div class="field" id="store"></div></div><div id="weekLabel">Week No:</div><div class="entry"><div class="field" id="week"></div></div></div>
+<table id="kpiTable"><colgroup><col><col><col><col><col><col><col></colgroup><thead><tr><th rowspan="2" id="weeklyProdOverview">Weekly Prod<br>Overview</th><th colspan="2">Units</th><th colspan="2">Total Hours</th><th colspan="2">Net Prod</th></tr><tr>
+<th id="planUnitsHeader">Manager Adjust</th><th id="unitsActualHeader">Actual</th>
+<th id="planHoursHeader">Manager Adjust</th><th id="hoursActualHeader">Actual</th>
+<th>Plan</th><th id="prodActualHeader">Actual</th>
+</tr></thead><tbody id="rows"></tbody>
+<tbody><tr class="total"><td class="day">Weekly Total</td><td id="planUnitsTotal"></td><td id="unitDelta" class="delta"></td><td id="planHoursTotal"></td><td id="hourDelta" class="delta"></td><td id="planProd"></td><td id="actualProd"></td></tr></tbody></table>
+<div class="kpis" id="kpiBottom">
+  <div class="kpi legacy-kpi" id="legacyKpi">
+    <div class="legacy-slot" id="cirSlot"><h3 id="cirTitle">CIR</h3><div class="value"><div class="field" id="cir"></div></div></div>
+    <div class="legacy-slot" id="woSlot"><h3 id="woTitle">Write Offs WTD</h3><div class="value"><div class="field" id="wo"></div></div></div>
+  </div>
+  <div class="kpi-spacer" id="legacySpacer"></div>
+  <div class="kpi"><h3 id="prodMtdTitle">Prod MTD</h3><div class="value"><div class="field" id="mtd"></div></div><h3>Prod YTD</h3><div class="value"><div class="field" id="ytd"></div></div></div>
+  <div class="kpi-spacer" id="mainSpacer"></div>
+  <div class="kpi"><h3>Target Prod</h3><div class="value"><div class="field" id="target"></div></div><h3>Hours to Save</h3><div class="value"><span id="hoursSave"></span></div></div>
+</div>
+</section></div></div>
+<div id="prodWidgetModal" aria-hidden="true">
+  <div id="prodWidgetCard">
+    <button id="prodWidgetClose" aria-label="Close widget prod">×</button>
+    <h3>Widget Prod</h3>
+
+    <div class="prod-widget-editbar">
+      <button id="undoWidgetProd" disabled>Undo</button>
+      <button id="redoWidgetProd" disabled>Redo</button>
+      <button id="deleteWidgetProdField">Delete</button>
+    </div>
+
+    <div class="prod-widget-grid">
+      <div></div><div class="hdr">Units</div><div class="hdr">Hours</div>
+      <div class="n">1</div><input class="widget-units-part" inputmode="decimal" autocomplete="off" placeholder="0"><input class="widget-hours-part" inputmode="decimal" autocomplete="off" placeholder="0">
+      <div class="n">2</div><input class="widget-units-part" inputmode="decimal" autocomplete="off" placeholder="0"><input class="widget-hours-part" inputmode="decimal" autocomplete="off" placeholder="0">
+      <div class="n">3</div><input class="widget-units-part" inputmode="decimal" autocomplete="off" placeholder="0"><input class="widget-hours-part" inputmode="decimal" autocomplete="off" placeholder="0">
+      <div class="n">4</div><input class="widget-units-part" inputmode="decimal" autocomplete="off" placeholder="0"><input class="widget-hours-part" inputmode="decimal" autocomplete="off" placeholder="0">
+    </div>
+
+    <div class="prod-widget-total">
+      <div class="prod-widget-totalbox"><small>Total Units</small><strong id="widgetTotalUnitsDisplay">—</strong></div>
+      <div class="prod-widget-totalbox"><small>Total Hours</small><strong id="widgetTotalHoursDisplay">—</strong></div>
+    </div>
+
+    <div id="widgetManualProdWrap"><small>Prod</small><div id="widgetManualProd">—</div></div>
+
+    <div id="widgetProdTargetWrap">
+      <label for="widgetProdTarget">Prod Target</label>
+      <input id="widgetProdTarget" inputmode="decimal" autocomplete="off" placeholder="0">
+    </div>
+
+    <div id="widgetHoursSaveWrap">
+      <small>Hours to Save</small>
+      <div id="widgetHoursSave">—</div>
+    </div>
+
+    <div class="prod-widget-actions">
+      <button id="clearWidgetProd">Clear</button>
+      <button id="grandTotalWidgetProd">Grand Total</button>
+      <button id="saveWidgetProd">Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="extraKpiMenu" aria-hidden="true">
+  <div id="extraKpiCard">
+    <button id="extraKpiClose" aria-label="Close extra KPI menu">×</button>
+    <h3>Extra KPIs</h3>
+    <div class="extra-kpi-actions">
+      <button id="toggleCir">Add CIR</button>
+      <button id="toggleWo">Add WO</button>
+    </div>
+  </div>
+</div>
+<div id="widgetMenu" aria-hidden="true"><div id="widgetMenuCard"><button id="widgetMenuClose" aria-label="Close widget menu">×</button><h3>Widget</h3><button id="adjustWidget">Adjust Widget</button></div></div>
+
+<div id="weekSetupEditor" aria-hidden="true">
+  <div class="fe-shell">
+    <header class="fe-topbar">
+      <div class="fe-brand">PROD</div>
+      <div class="fe-meta">WEEK SETUP</div>
+      <button id="setupClose" class="fe-close" type="button" aria-label="Close week setup">×</button>
+    </header>
+    <main class="fe-main">
+      <div class="fe-kicker">WEEK SETUP</div>
+      <section class="fe-card">
+        <div class="fe-title-wrap" style="margin-bottom:14px">
+          <h2>Edit setup figures</h2>
+          <p>Update Store, Week and KPI figures without editing the spreadsheet cells.</p>
+        </div>
+        <div class="setup-grid two-col">
+          <div class="setup-field"><label for="setupStore">Store number</label><input id="setupStore" class="fe-input setup-input" readonly inputmode="none" autocomplete="off" placeholder="—"></div>
+          <div class="setup-field"><label for="setupWeek">Week number</label><input id="setupWeek" class="fe-input setup-input" readonly inputmode="none" autocomplete="off" placeholder="—"></div>
+          <div class="setup-field"><label for="setupTarget">Prod target</label><input id="setupTarget" class="fe-input setup-input" readonly inputmode="none" autocomplete="off" placeholder="—"></div>
+          <div class="setup-field"><label for="setupCir">CIR</label><div class="setup-value percent"><input id="setupCir" class="fe-input setup-input" readonly inputmode="none" autocomplete="off" placeholder="—"></div></div>
+          <div class="setup-field"><label for="setupWo">WO WTD</label><div class="setup-value percent"><input id="setupWo" class="fe-input setup-input" readonly inputmode="none" autocomplete="off" placeholder="—"></div></div>
+          <div class="setup-field"><label for="setupMtd">Prod MTD</label><input id="setupMtd" class="fe-input setup-input" readonly inputmode="none" autocomplete="off" placeholder="—"></div>
+          <div class="setup-field full"><label for="setupYtd">Prod YTD</label><input id="setupYtd" class="fe-input setup-input" readonly inputmode="none" autocomplete="off" placeholder="—"></div>
+        </div>
+        <div class="fe-actions">
+          <button id="setupCancel" type="button">Cancel</button>
+          <button id="setupSave" type="button">Save & Return</button>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div id="figureEditor" aria-hidden="true">
+  <div class="fe-shell">
+    <header class="fe-topbar">
+      <div class="fe-brand">PROD</div>
+      <div class="fe-meta" id="feMeta">Store — • Week —</div>
+      <button id="feClose" class="fe-close" type="button" aria-label="Close editor">×</button>
+    </header>
+    <main class="fe-main">
+      <div class="fe-kicker" id="feKicker">PLANNED FIGURES</div>
+      <section class="fe-card">
+        <div class="fe-head">
+          <div class="fe-title-wrap">
+            <h2 id="feTitle">Manager Adjust</h2>
+            <p id="feSubtitle">Enter Units and Hours together.</p>
+          </div>
+          <div class="fe-total-grid">
+            <div class="fe-total"><small>Units total</small><strong id="feUnitsTotal">—</strong></div>
+            <div class="fe-total"><small>Hours total</small><strong id="feHoursTotal">—</strong></div>
+          </div>
+        </div>
+        <div class="fe-columns"><span>Day</span><span>Units</span><span>Hours</span></div>
+        <div id="feRows"></div>
+        <div class="fe-actions">
+          <button id="feCancel" type="button">Cancel</button>
+          <button id="feSave" type="button">Save & Return</button>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div id="editorPad" aria-hidden="true">
+  <div class="ep-status">
+    <div class="ep-status-top"><span id="epContext">—</span><button id="epUndo" type="button" disabled>Undo</button></div>
+    <div class="ep-wtd" id="epWtd">
+      <div class="ep-wtd-item"><small>Units diff WTD</small><strong id="epUnitsDiff">—</strong></div>
+      <div class="ep-wtd-item"><small>Hours diff WTD</small><strong id="epHoursDiff">—</strong></div>
+      <div class="ep-wtd-item"><small>Actual Prod WTD</small><strong id="epActualProd">—</strong></div>
+    </div>
+  </div>
+  <div class="ep-nav">
+    <button type="button" data-ep-action="prev">‹ Previous</button>
+    <button type="button" data-ep-action="next">Next ›</button>
+    <button type="button" data-ep-action="clear">Delete</button>
+    <button type="button" class="ep-done" data-ep-action="done">Done</button>
+  </div>
+  <div class="ep-grid">
+    <button type="button" data-ep-key="7">7</button><button type="button" data-ep-key="8">8</button><button type="button" data-ep-key="9">9</button><button type="button" data-ep-action="back">⌫</button>
+    <button type="button" data-ep-key="4">4</button><button type="button" data-ep-key="5">5</button><button type="button" data-ep-key="6">6</button><button type="button" class="ep-op" data-ep-key="-">−</button>
+    <button type="button" data-ep-key="1">1</button><button type="button" data-ep-key="2">2</button><button type="button" data-ep-key="3">3</button><button type="button" class="ep-op" data-ep-key="+">+</button>
+  </div>
+  <div class="ep-bottom">
+    <button type="button" data-ep-key="0">0</button><button type="button" data-ep-key=".">.</button><button type="button" class="ep-enter" data-ep-action="enter" aria-label="Enter / move down">↵</button>
+  </div>
+</div>
+
+<div id="editToast" role="status" aria-live="polite"></div>
+<div id="overviewModal" aria-hidden="true"><button id="overviewClose" type="button" aria-label="Close overview" onclick="closeOverviewNow(event)">×</button><div id="overviewCard"><img id="overviewImage" alt="KPI table overview"></div></div>
+<div id="fastpad">
+<div id="entryStatus" aria-live="polite">
+  <div id="entryStatusMain">
+    <span id="entryStatusDay">—</span>
+    <span id="entryStatusField">—</span>
+  </div>
+  <div id="entryStatusSub">
+    <span id="entryStatusValue">—</span>
+    <span id="entryStatusProgress"></span>
+  </div>
+</div>
+<div class="padnav"><button class="nav" data-action="prev">‹ Previous</button><button class="nav" data-action="next">Next ›</button><button class="nav" data-action="clear">Delete</button><button class="nav done" data-action="done">Done</button></div>
+<div class="padgrid"><button data-key="7">7</button><button data-key="8">8</button><button data-key="9">9</button><button data-action="back">⌫</button><button data-key="4">4</button><button data-key="5">5</button><button data-key="6">6</button><button class="op" data-key="-">−</button><button data-key="1">1</button><button data-key="2">2</button><button data-key="3">3</button><button class="op" data-key="+">+</button></div>
+<div class="padbottom"><button class="zero" data-key="0">0</button><button data-key=".">.</button><button class="enter" data-action="enter">↵</button></div></div>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script><script>
+const days=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],rows=document.getElementById("rows");
+days.forEach((d,dayIndex)=>{let tr=document.createElement("tr");tr.innerHTML=`<td class="day" data-day-index="${dayIndex}"><span class="day-name">${d}</span><span class="week-date"></span></td><td><div class="field pu"></div></td><td class="actual-input"><div class="actual-value-wrap units-diff-wrap"><div class="field au"></div><span class="day-diff units-day-diff"></span></div></td><td><div class="field ph"></div></td><td class="actual-input"><div class="actual-value-wrap hours-diff-wrap"><div class="field ah"></div><span class="day-diff hours-day-diff"></span></div></td><td class="pp"></td><td><div class="actual-value-wrap prod-diff-wrap"><span class="ap"></span><span class="day-diff prod-day-diff"></span></div></td>`;rows.appendChild(tr)});
+const num=x=>{const raw=String(x??"").trim().replace(/,/g,"");if(!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(raw))return 0;const n=Number(raw);return Number.isFinite(n)?n:0},hourNum=i=>{const shown=getVal(i).trim();if(shown==="")return 0;return num(i?.dataset?.rawHour??shown)},fmt=(n,d=0)=>n.toLocaleString("en-GB",{minimumFractionDigits:d,maximumFractionDigits:d});
+
+// Individual day hours are DISPLAYED as whole hours, but the exact decimal
+// stays in data-raw-hour and is used by every total / productivity calculation.
+// < .50 rounds down; .50 and above rounds up.
+function formatHourField(el){
+  if(!el)return;
+  const shown=getVal(el).trim();
+  if(shown===""){delete el.dataset.rawHour;return}
+  const exactRaw=el.dataset.rawHour??shown;
+  const exact=parseFloat(String(exactRaw).replace(/,/g,""));
+  if(!Number.isFinite(exact))return;
+
+  // If a decimal arrived from an older build/import, preserve it before hiding it.
+  if(!el.dataset.rawHour)el.dataset.rawHour=String(exact);
+
+  // While the old spreadsheet keypad is actively editing this box, leave the
+  // raw text visible. As soon as editing ends, recalc/finishHour shows the round number.
+  if(!el.classList.contains("pad-active")){
+    setVal(el,String(Math.floor(exact+0.5)));
+  }
+}
+
+
+function formatPercentKpiField(el){
+  if(!el)return;
+  const raw=getVal(el).trim();
+  if(raw===""){el.textContent="";return}
+  // Keep the stored value numeric. Only the visible spreadsheet text gets %.
+  const n=parseFloat(raw.replace(/,/g,"").replace(/%/g,""));
+  if(Number.isFinite(n))el.textContent=raw.replace(/%/g,"")+"%";
+  else el.textContent=raw;
+}
+
+function formatUnitField(el){
+  if(!el)return;
+  const raw=getVal(el).trim();
+  if(raw===""){
+    el.textContent="";
+    return;
+  }
+
+  // Keep incomplete/special keypad entries visible exactly as typed.
+  if(raw==="+"||raw==="-"||raw.endsWith(".")||raw.endsWith("%")){
+    el.textContent=raw;
+    return;
+  }
+
+  // Units are displayed as whole numbers with thousands separators.
+  if(/^[+-]?\d+$/.test(raw)){
+    el.textContent=Math.round(num(raw)).toLocaleString("en-GB");
+  }else{
+    el.textContent=raw;
+  }
+}
+let widgetData={planProd:null,actualProd:null,unitsDiff:null,hoursDiff:null,hoursSave:null};
+function recalc(){let PU=0,PH=0,liveU=0,liveH=0,enteredU=0,enteredH=0;[...rows.rows].forEach(tr=>{let puEl=tr.querySelector(".pu"),auEl=tr.querySelector(".au"),phEl=tr.querySelector(".ph"),ahEl=tr.querySelector(".ah");formatUnitField(puEl);formatUnitField(auEl);formatHourField(phEl);formatHourField(ahEl);let ar=getVal(auEl).trim(),hr=getVal(ahEl).trim(),pu=num(getVal(puEl)),au=num(ar),ph=hourNum(phEl),ah=hourNum(ahEl);PU+=pu;PH+=ph;liveU+=ar!==""?au:pu;liveH+=hr!==""?ah:ph;if(ar!=="")enteredU++;if(hr!=="")enteredH++;let pp=ph?pu/ph:null,ap=(ar!==""&&hr!==""&&ah)?au/ah:null;tr.querySelector(".pp").textContent=pp!==null?fmt(pp,1):"";tr.querySelector(".ap").textContent=ap!==null?fmt(ap,1):""});
+planUnitsTotal.textContent=PU?fmt(PU):"";planHoursTotal.textContent=PH?fmt(PH,2):"";let ud=liveU-PU,hd=liveH-PH;unitDelta.textContent=enteredU?(ud>=0?"+":"")+fmt(ud):"";unitDelta.className="delta "+(enteredU?(ud>=0?"good":"bad"):"");hourDelta.textContent=enteredH?(hd>=0?"+":"")+fmt(hd,2):"";hourDelta.className="delta "+(enteredH?(hd<=0?"good":"bad"):"");let wp=PU&&PH?PU/PH:null,wa=(enteredU||enteredH)&&liveH?liveU/liveH:null;planProd.textContent=wp!==null?fmt(wp,1):"";actualProd.textContent=wa!==null?fmt(wa,1):"";actualProd.style.color=wa===null||wp===null?"":wa>wp?"var(--green)":wa<wp?"var(--red)":"";let t=num(getVal(target)),hs=t&&PU&&PH?PH-PU/t:null;hoursSave.textContent=hs===null?"":(hs>0?"+":"")+fmt(hs,1);hoursSave.style.color=hs===null?"":hs<=0?"var(--green)":"var(--red)";formatPercentKpiField(cir);formatPercentKpiField(wo);widgetData={planProd:wp,actualProd:wa,unitsDiff:enteredU?ud:null,hoursDiff:enteredH?hd:null,hoursSave:hs};if(typeof refreshDailyDiffs==="function")refreshDailyDiffs();}
+const allInputs=()=>[...document.querySelectorAll(".field")];
+const getVal=x=>x?.dataset?.value??"";
+const setVal=(x,v)=>{if(!x)return;x.dataset.value=String(v??"");x.textContent=String(v??"")};
+// Keep test draft completely separate from LIVE data (same website origin).
+const KPI_TEST_DRAFT_KEY="kpi_app_test_v1_draft";
+function persistKpiDraft(){
+  try{
+    const data=JSON.parse(snapshot());
+    if(data.every(x=>!x.value&&!x.raw)){
+      localStorage.removeItem(KPI_TEST_DRAFT_KEY);
+      return;
+    }
+    localStorage.setItem(KPI_TEST_DRAFT_KEY,JSON.stringify({version:1,when:Date.now(),values:data}));
+  }catch(err){console.warn("Could not save test draft",err)}
+}
+function loadKpiDraft(){
+  try{
+    const x=JSON.parse(localStorage.getItem(KPI_TEST_DRAFT_KEY)||"null");
+    const inputs=allInputs();
+    if(!x||x.version!==1||!Array.isArray(x.values)||x.values.length!==inputs.length)return false;
+    if(!x.values.every(v=>v&&typeof v.value==="string"&&typeof v.raw==="string"))return false;
+    x.values.forEach((v,i)=>{
+      setVal(inputs[i],v.value);
+      if(v.raw)inputs[i].dataset.rawHour=v.raw;
+      else delete inputs[i].dataset.rawHour;
+    });
+    return true;
+  }catch(err){console.warn("Could not restore test draft",err);return false}
+}
+function clearKpiDraft(){try{localStorage.removeItem(KPI_TEST_DRAFT_KEY)}catch(_){}}
+window.addEventListener("pagehide",persistKpiDraft);
+let undoStack=[],redoStack=[],historyBusy=false,lastSnapshot="";
+let editSessionInput=null,editSessionStartSnapshot="",editSessionDirty=false;
+
+const snapshot=()=>JSON.stringify(allInputs().map(x=>({value:getVal(x),raw:x.dataset.rawHour||""})));
+
+function updateHistoryButtons(){
+  const u=document.getElementById("undo"),r=document.getElementById("redo");
+  u.disabled=!undoStack.length;
+  r.disabled=!redoStack.length;
+}
+
+function resetEditSession(){
+  editSessionInput=null;
+  editSessionStartSnapshot="";
+  editSessionDirty=false;
+}
+
+function beginEditSession(i){
+  if(!i)return;
+  if(editSessionInput===i)return;
+  editSessionInput=i;
+  editSessionStartSnapshot=snapshot();
+  editSessionDirty=false;
+}
+
+function applySnapshot(s){
+  historyBusy=true;
+  let vals=JSON.parse(s);
+  vals.forEach((v,i)=>{
+    let x=allInputs()[i];
+    if(!x)return;
+    setVal(x,v.value);
+    if(v.raw)x.dataset.rawHour=v.raw;
+    else delete x.dataset.rawHour;
+  });
+  historyBusy=false;
+  recalc();
+  lastSnapshot=s;
+  resetEditSession();
+  updateHistoryButtons();
+  persistKpiDraft();
+}
+
+function recordHistory(){
+  if(historyBusy)return;
+  const now=snapshot();
+
+  // While a box is being edited, the ENTIRE typing session is one undo action.
+  // Example: blank -> 1234. Undo restores blank; Redo restores 1234.
+  if(activeInput){
+    if(editSessionInput!==activeInput)beginEditSession(activeInput);
+
+    if(!editSessionDirty && editSessionStartSnapshot && now!==editSessionStartSnapshot){
+      undoStack.push(editSessionStartSnapshot);
+      if(undoStack.length>100)undoStack.shift();
+      redoStack=[];
+      editSessionDirty=true;
+    }
+
+    lastSnapshot=now;
+    updateHistoryButtons();
+    return;
+  }
+
+  // Changes made outside the keypad (for example a calculated field being written)
+  // remain a normal single history action.
+  if(lastSnapshot&&now!==lastSnapshot){
+    undoStack.push(lastSnapshot);
+    if(undoStack.length>100)undoStack.shift();
+    redoStack=[];
+  }
+  lastSnapshot=now;
+  updateHistoryButtons();
+}
+
+document.addEventListener("input",e=>{if(e.target?.classList?.contains("field"))e.target.classList.remove("invalid");recordHistory();recalc();persistKpiDraft()});
+
+/* Paired Planned / Actual figure editor + Store/Week editor */
+const figureEditor=document.getElementById("figureEditor"),
+      weekSetupEditor=document.getElementById("weekSetupEditor"),
+      feMeta=document.getElementById("feMeta"),
+      feKicker=document.getElementById("feKicker"),
+      feTitle=document.getElementById("feTitle"),
+      feSubtitle=document.getElementById("feSubtitle"),
+      feRows=document.getElementById("feRows"),
+      feUnitsTotal=document.getElementById("feUnitsTotal"),
+      feHoursTotal=document.getElementById("feHoursTotal"),
+      feClose=document.getElementById("feClose"),
+      feCancel=document.getElementById("feCancel"),
+      feSave=document.getElementById("feSave"),
+      setupClose=document.getElementById("setupClose"),
+      setupCancel=document.getElementById("setupCancel"),
+      setupSave=document.getElementById("setupSave"),
+      setupStore=document.getElementById("setupStore"),
+      setupWeek=document.getElementById("setupWeek"),
+      setupTarget=document.getElementById("setupTarget"),
+      setupCir=document.getElementById("setupCir"),
+      setupWo=document.getElementById("setupWo"),
+      setupMtd=document.getElementById("setupMtd"),
+      setupYtd=document.getElementById("setupYtd"),
+      planUnitsHeader=document.getElementById("planUnitsHeader"),
+      planHoursHeader=document.getElementById("planHoursHeader"),
+      editorPad=document.getElementById("editorPad"),
+      epContext=document.getElementById("epContext"),
+      epUndo=document.getElementById("epUndo"),
+      epUnitsDiff=document.getElementById("epUnitsDiff"),
+      epHoursDiff=document.getElementById("epHoursDiff"),
+      epActualProd=document.getElementById("epActualProd");
+
+let figureEditorMode="plan";
+let editorActiveInput=null;
+let editorContext="figure";
+let editorUndoStack=[];
+let editorFieldDirty=false;
+let editorBeforeFieldSnapshot="";
+
+function editorDateText(dayIndex){
+  const weekNo=parseInt(getVal(week).trim(),10);
+  if(!Number.isInteger(weekNo)||weekNo<1||weekNo>53)return "";
+  const monday=isoWeekMonday(new Date().getFullYear(),weekNo);
+  const d=new Date(monday);
+  d.setUTCDate(monday.getUTCDate()+dayIndex);
+  return String(d.getUTCDate()).padStart(2,"0")+"/"+String(d.getUTCMonth()+1).padStart(2,"0");
+}
+
+function editorFieldPair(tr,mode){
+  return mode==="plan"
+    ?[tr.querySelector(".pu"),tr.querySelector(".ph")]
+    :[tr.querySelector(".au"),tr.querySelector(".ah")];
+}
+
+function editorHourText(field){
+  if(!field)return "";
+  return field.dataset.rawHour??getVal(field).trim();
+}
+
+function editorNumber(v){
+  const raw=String(v??"").trim().replace(/,/g,"");
+  if(!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(raw))return null;
+  const n=Number(raw);
+  return Number.isFinite(n)?n:null;
+}
+
+function editorSnapshot(){
+  if(editorContext==="setup")return JSON.stringify([setupStore.value,setupWeek.value,setupTarget.value,setupCir.value,setupWo.value,setupMtd.value,setupYtd.value]);
+  return JSON.stringify([...feRows.querySelectorAll(".fe-input")].map(i=>i.value));
+}
+
+function applyEditorSnapshot(snap){
+  let vals=[];
+  try{vals=JSON.parse(snap)}catch(_){return}
+  const inputs=editorContext==="setup"?[setupStore,setupWeek,setupTarget,setupCir,setupWo,setupMtd,setupYtd]:[...feRows.querySelectorAll(".fe-input")];
+  inputs.forEach((i,n)=>i.value=vals[n]??"");
+  editorFieldDirty=false;
+  editorBeforeFieldSnapshot=editorSnapshot();
+  updateFigureEditorTotals();
+  updateEditorWtd();
+  updateEditorUndoButton();
+}
+
+function updateEditorUndoButton(){
+  epUndo.disabled=!editorUndoStack.length;
+}
+
+function beginEditorFieldSession(){
+  editorFieldDirty=false;
+  editorBeforeFieldSnapshot=editorSnapshot();
+}
+
+function recordEditorFieldUndo(){
+  if(editorFieldDirty)return;
+  const now=editorSnapshot();
+  if(editorBeforeFieldSnapshot&&now!==editorBeforeFieldSnapshot){
+    editorUndoStack.push(editorBeforeFieldSnapshot);
+    if(editorUndoStack.length>60)editorUndoStack.shift();
+    editorFieldDirty=true;
+    updateEditorUndoButton();
+  }
+}
+
+function editorInputSequence(){
+  if(editorContext==="setup")return [setupStore,setupWeek,setupTarget,setupCir,setupWo,setupMtd,setupYtd];
+  const out=[];
+  feRows.querySelectorAll(".fe-row").forEach(row=>{
+    out.push(row.querySelector(".fe-units"),row.querySelector(".fe-hours"));
+  });
+  return out.filter(Boolean);
+}
+
+function editorInputKind(input){
+  if(!input)return "units";
+  if(input===setupStore||input===setupWeek||input===setupTarget)return "integer";
+  if(input===setupCir||input===setupWo||input===setupMtd||input===setupYtd)return "signed-decimal";
+  if(input.classList.contains("fe-hours"))return "hours";
+  return "units";
+}
+
+function updateEditorPadKeys(){
+  const kind=editorInputKind(editorActiveInput);
+  const decimal=editorPad.querySelector('[data-ep-key="."]');
+  const plus=editorPad.querySelector('[data-ep-key="+"]');
+  const minus=editorPad.querySelector('[data-ep-key="-"]');
+  if(decimal)decimal.disabled=!(kind==="hours"||kind==="signed-decimal");
+  if(plus)plus.disabled=true;
+  if(minus)minus.disabled=kind!=="signed-decimal";
+}
+
+function clearEditorActiveRow(){
+  document.querySelectorAll(".fe-row.fe-row-active").forEach(r=>r.classList.remove("fe-row-active"));
+  document.querySelectorAll(".fe-input.editor-active").forEach(i=>i.classList.remove("editor-active"));
+}
+
+function ensureEditorInputVisible(input){
+  if(!input||!editorPad.classList.contains("show"))return;
+  requestAnimationFrame(()=>{
+    const padTop=editorPad.getBoundingClientRect().top;
+    const r=input.getBoundingClientRect();
+    const overlay=editorContext==="setup"?weekSetupEditor:figureEditor;
+    const header=overlay.querySelector(".fe-topbar");
+    const safeTop=(header?.getBoundingClientRect().bottom||0)+10;
+    const safeBottom=padTop-14;
+    if(r.bottom>safeBottom)overlay.scrollBy({top:r.bottom-safeBottom+12,left:0,behavior:"smooth"});
+    else if(r.top<safeTop)overlay.scrollBy({top:r.top-safeTop-12,left:0,behavior:"smooth"});
+  });
+}
+
+function editorContextLabel(input){
+  if(editorContext==="setup"){
+    if(input===setupStore)return "Store number";
+    if(input===setupWeek)return "Week number";
+    if(input===setupTarget)return "Prod target";
+    if(input===setupCir)return "CIR";
+    if(input===setupWo)return "WO WTD";
+    if(input===setupMtd)return "Prod MTD";
+    if(input===setupYtd)return "Prod YTD";
+    return "Setup";
+  }
+  const row=input?.closest(".fe-row");
+  const day=row?.querySelector(".fe-day strong")?.textContent||"";
+  const field=input?.classList.contains("fe-hours")?"Hours":"Units";
+  return (day+" • "+field).trim();
+}
+
+function selectEditorInput(input){
+  if(!input)return;
+  if(editorActiveInput!==input){
+    editorFieldDirty=false;
+    editorBeforeFieldSnapshot=editorSnapshot();
+  }
+  editorActiveInput=input;
+  clearEditorActiveRow();
+  input.classList.add("editor-active");
+  input.closest(".fe-row")?.classList.add("fe-row-active");
+  input.focus({preventScroll:true});
+  epContext.textContent=editorContextLabel(input);
+  updateEditorPadKeys();
+  editorPad.classList.add("show");
+  editorPad.setAttribute("aria-hidden","false");
+  editorPad.classList.toggle("setup-mode",editorContext==="setup");
+  (editorContext==="setup"?weekSetupEditor:figureEditor).classList.add("pad-show");
+  updateEditorWtd();
+  updateEditorUndoButton();
+  ensureEditorInputVisible(input);
+}
+
+function hideEditorPad(){
+  editorPad.classList.remove("show","setup-mode");
+  editorPad.setAttribute("aria-hidden","true");
+  figureEditor.classList.remove("pad-show");
+  weekSetupEditor.classList.remove("pad-show");
+  clearEditorActiveRow();
+  editorActiveInput=null;
+  editorFieldDirty=false;
+  editorBeforeFieldSnapshot="";
+}
+
+function updateFigureEditorTotals(){
+  if(editorContext!=="figure")return;
+  let units=0,hours=0,hasUnits=false,hasHours=false;
+  feRows.querySelectorAll(".fe-row").forEach(row=>{
+    const u=editorNumber(row.querySelector(".fe-units")?.value);
+    const h=editorNumber(row.querySelector(".fe-hours")?.value);
+    if(u!==null){units+=u;hasUnits=true}
+    if(h!==null){hours+=h;hasHours=true}
+  });
+  feUnitsTotal.textContent=hasUnits?fmt(units,0):"—";
+  feHoursTotal.textContent=hasHours?fmt(hours,2):"—";
+}
+
+function sheetDayValues(i){
+  const tr=rows.rows[i];
+  if(!tr)return {pu:0,ph:0,auText:"",ahText:"",au:0,ah:0};
+  const puEl=tr.querySelector(".pu"),phEl=tr.querySelector(".ph"),auEl=tr.querySelector(".au"),ahEl=tr.querySelector(".ah");
+  const auText=getVal(auEl).trim(),ahText=getVal(ahEl).trim();
+  return {
+    pu:num(getVal(puEl)),
+    ph:editorNumber(editorHourText(phEl))??0,
+    auText,ahText,
+    au:num(auText),
+    ah:editorNumber(editorHourText(ahEl))??0
+  };
+}
+
+function editorDayValues(i){
+  const sheet=sheetDayValues(i);
+  const row=feRows.querySelectorAll(".fe-row")[i];
+  if(!row)return sheet;
+  if(figureEditorMode==="plan"){
+    return {...sheet,pu:editorNumber(row.querySelector(".fe-units")?.value)??0,ph:editorNumber(row.querySelector(".fe-hours")?.value)??0};
+  }
+  const auRaw=(row.querySelector(".fe-units")?.value||"").trim();
+  const ahRaw=(row.querySelector(".fe-hours")?.value||"").trim();
+  return {...sheet,auText:auRaw,ahText:ahRaw,au:editorNumber(auRaw)??0,ah:editorNumber(ahRaw)??0};
+}
+
+function setWtdValue(el,value,decimals,positiveGood=null){
+  el.classList.remove("good","bad");
+  if(value===null||!Number.isFinite(value)){el.textContent="—";return}
+  el.textContent=(value>0?"+":"")+fmt(value,decimals);
+  if(positiveGood!==null)el.classList.add((positiveGood?value>=0:value<=0)?"good":"bad");
+}
+
+function updateEditorWtd(){
+  if(editorContext!=="figure")return;
+  let PU=0,PH=0,liveU=0,liveH=0,enteredU=0,enteredH=0;
+  for(let i=0;i<days.length;i++){
+    const v=editorDayValues(i);
+    PU+=v.pu;PH+=v.ph;
+    if(v.auText!==""){liveU+=v.au;enteredU++}else liveU+=v.pu;
+    if(v.ahText!==""){liveH+=v.ah;enteredH++}else liveH+=v.ph;
+  }
+  const ud=enteredU?liveU-PU:null;
+  const hd=enteredH?liveH-PH:null;
+  const prod=(enteredU||enteredH)&&liveH>0?liveU/liveH:null;
+  setWtdValue(epUnitsDiff,ud,0,true);
+  setWtdValue(epHoursDiff,hd,2,false);
+  setWtdValue(epActualProd,prod,1,null);
+}
+
+function planLineForDay(i){
+  const v=sheetDayValues(i);
+  const u=v.pu?fmt(v.pu,0):"—";
+  const h=v.ph?fmt(v.ph,2):"—";
+  return "Plan "+u+" units • "+h+"h";
+}
+
+function wireReadonlyEditorInput(input){
+  input.setAttribute("readonly","");
+  input.setAttribute("inputmode","none");
+  input.addEventListener("pointerdown",e=>{e.preventDefault();selectEditorInput(input)});
+  input.addEventListener("click",e=>e.preventDefault());
+}
+
+function openFigureEditor(mode){
+  if(activeInput)closePad();
+  closeWeekSetupEditor();
+  figureEditorMode=mode==="actual"?"actual":"plan";
+  editorContext="figure";
+  editorUndoStack=[];
+  editorFieldDirty=false;
+  editorBeforeFieldSnapshot="";
+
+  feKicker.textContent=figureEditorMode==="plan"?"PLANNED FIGURES":"ACTUAL FIGURES";
+  feTitle.textContent=figureEditorMode==="plan"?"Manager Adjust":"Actual";
+  feSubtitle.textContent=figureEditorMode==="plan"?"Enter planned Units and Hours together.":"Enter Actual Units and Hours. Planned figures stay visible for reference.";
+  const storeText=getVal(store).trim()||"—";
+  const weekText=getVal(week).trim()||"—";
+  feMeta.textContent="Store "+storeText+" • Week "+weekText;
+
+  feRows.innerHTML="";
+  [...rows.rows].forEach((tr,i)=>{
+    const [unitField,hourField]=editorFieldPair(tr,figureEditorMode);
+    const row=document.createElement("div");
+    row.className="fe-row";
+    row.innerHTML=
+      '<div class="fe-day"><strong>'+days[i]+'</strong><span class="fe-date">'+editorDateText(i)+'</span>'+
+      (figureEditorMode==="actual"?'<span class="fe-plan">'+planLineForDay(i)+'</span>':'')+'</div>'+ 
+      '<input class="fe-input fe-units" readonly inputmode="none" autocomplete="off" aria-label="'+days[i]+' units" placeholder="—">'+
+      '<input class="fe-input fe-hours" readonly inputmode="none" autocomplete="off" aria-label="'+days[i]+' hours" placeholder="—">';
+    row.querySelector(".fe-units").value=getVal(unitField).trim();
+    row.querySelector(".fe-hours").value=editorHourText(hourField);
+    feRows.appendChild(row);
+  });
+
+  feRows.querySelectorAll(".fe-input").forEach(wireReadonlyEditorInput);
+  updateFigureEditorTotals();
+  updateEditorWtd();
+  updateEditorUndoButton();
+
+  figureEditor.classList.add("show");
+  figureEditor.setAttribute("aria-hidden","false");
+  document.body.style.overflow="hidden";
+  figureEditor.scrollTop=0;
+}
+
+function closeFigureEditor(){
+  if(!figureEditor.classList.contains("show"))return;
+  hideEditorPad();
+  figureEditor.classList.remove("show");
+  figureEditor.setAttribute("aria-hidden","true");
+  document.body.style.overflow="";
+}
+
+function openWeekSetupEditor(preferred="store"){
+  if(activeInput)closePad();
+  closeFigureEditor();
+  editorContext="setup";
+  editorUndoStack=[];
+  editorFieldDirty=false;
+  editorBeforeFieldSnapshot="";
+  setupStore.value=getVal(store).trim();
+  setupWeek.value=getVal(week).trim();
+  setupTarget.value=getVal(target).trim();
+  setupCir.value=getVal(cir).trim().replace(/%/g,"");
+  setupWo.value=getVal(wo).trim().replace(/%/g,"");
+  setupMtd.value=getVal(mtd).trim();
+  setupYtd.value=getVal(ytd).trim();
+  weekSetupEditor.classList.add("show");
+  weekSetupEditor.setAttribute("aria-hidden","false");
+  document.body.style.overflow="hidden";
+  weekSetupEditor.scrollTop=0;
+  updateEditorUndoButton();
+  selectEditorInput(preferred==="week"?setupWeek:setupStore);
+}
+
+function closeWeekSetupEditor(){
+  if(!weekSetupEditor.classList.contains("show"))return;
+  hideEditorPad();
+  weekSetupEditor.classList.remove("show");
+  weekSetupEditor.setAttribute("aria-hidden","true");
+  document.body.style.overflow="";
+}
+
+function applyEditorHour(field,raw){
+  raw=String(raw??"").trim().replace(/,/g,"");
+  if(raw===""){
+    setVal(field,"");
+    delete field.dataset.rawHour;
+    return;
+  }
+  const n=parseFloat(raw);
+  if(Number.isFinite(n)){
+    field.dataset.rawHour=String(n); // exact decimal retained for every calculation
+    setVal(field,String(Math.round(n))); // sheet display keeps its existing rounded style
+  }else{
+    setVal(field,raw);
+    delete field.dataset.rawHour;
+  }
+}
+
+
+/* TEST V1: numeric value validation before commit / share. */
+function validSheetNumber(value,isHour){
+  const raw=String(value??"").trim().replace(/,/g,"");
+  if(!raw)return true;
+  if(!(isHour?/^(?:\d+(?:\.\d*)?|\.\d+)$/:/^\d+$/).test(raw))return false;
+  const n=Number(raw);
+  return Number.isFinite(n)&&n>=0&&n<=(isHour?9999:999999999);
+}
+function invalidSheetField(){
+  for(const el of document.querySelectorAll("#rows .pu,#rows .au,#rows .ph,#rows .ah")){
+    const hours=el.classList.contains("ph")||el.classList.contains("ah");
+    const raw=hours?(el.dataset.rawHour??getVal(el)):getVal(el);
+    if(!validSheetNumber(raw,hours))return el;
+  }
+  return null;
+}
+function invalidFigureEditorField(){
+  for(const el of feRows.querySelectorAll(".fe-input")){
+    if(!validSheetNumber(el.value,el.classList.contains("fe-hours")))return el;
+  }
+  return null;
+}
+function invalidWidgetField(){
+  for(const el of [...widgetUnitParts,...widgetHourParts]){
+    if(!validSheetNumber(el.value,widgetHourParts.includes(el)))return el;
+  }
+  const targetRaw=widgetProdTarget.value.trim();
+  if(targetRaw!==""&&!(parseWidgetNumber(targetRaw)>0))return widgetProdTarget;
+  return null;
+}
+
+function saveFigureEditor(){
+  const invalid=invalidFigureEditorField();
+  if(invalid){alert("Correct the figure before saving. Units must be whole numbers; hours must be between 0 and 9,999.");selectEditorInput(invalid);return}
+  const before=snapshot();
+  historyBusy=true;
+
+  [...feRows.querySelectorAll(".fe-row")].forEach((row,i)=>{
+    const tr=rows.rows[i];
+    if(!tr)return;
+    const [unitField,hourField]=editorFieldPair(tr,figureEditorMode);
+    const unitRaw=(row.querySelector(".fe-units")?.value||"").trim().replace(/,/g,"");
+    const hourRaw=(row.querySelector(".fe-hours")?.value||"").trim();
+    setVal(unitField,unitRaw);
+    applyEditorHour(hourField,hourRaw);
+  });
+
+  historyBusy=false;
+  recalc();
+
+  const after=snapshot();
+  if(after!==before){
+    undoStack.push(before);
+    if(undoStack.length>100)undoStack.shift();
+    redoStack=[];
+    lastSnapshot=after;
+    resetEditSession();
+    updateHistoryButtons();
+  }
+  persistKpiDraft();
+  closeFigureEditor();
+}
+
+function saveWeekSetup(){
+  const newStore=setupStore.value.trim();
+  const newWeek=setupWeek.value.trim();
+  const newTarget=setupTarget.value.trim();
+  const newCir=setupCir.value.trim().replace(/%/g,"");
+  const newWo=setupWo.value.trim().replace(/%/g,"");
+  const newMtd=setupMtd.value.trim();
+  const newYtd=setupYtd.value.trim();
+  if(newStore!==""&&!/^\d{3,4}$/.test(newStore)){alert("Store number must be 3 or 4 digits.");selectEditorInput(setupStore);return}
+  if(newWeek!==""&&(!/^\d{1,2}$/.test(newWeek)||Number(newWeek)<1||Number(newWeek)>53)){alert("Week number must be between 1 and 53.");selectEditorInput(setupWeek);return}
+  if(newTarget!==""&&(!/^(?:\d+(?:\.\d*)?|\.\d+)$/.test(newTarget)||!Number.isFinite(Number(newTarget))||Number(newTarget)<=0)){alert("Prod target must be greater than zero.");selectEditorInput(setupTarget);return}
+  if(newCir!==""&&!/^-?\d+(?:\.\d+)?$/.test(newCir)){alert("CIR must be a number.");selectEditorInput(setupCir);return}
+  if(newWo!==""&&!/^-?\d+(?:\.\d+)?$/.test(newWo)){alert("WO WTD must be a number.");selectEditorInput(setupWo);return}
+  if(newMtd!==""&&!/^-?\d+(?:\.\d+)?$/.test(newMtd)){alert("Prod MTD must be a number.");selectEditorInput(setupMtd);return}
+  if(newYtd!==""&&!/^-?\d+(?:\.\d+)?$/.test(newYtd)){alert("Prod YTD must be a number.");selectEditorInput(setupYtd);return}
+
+  const before=snapshot();
+  historyBusy=true;
+  setVal(store,newStore);
+  setVal(week,newWeek);
+  setVal(target,newTarget);
+  setVal(cir,newCir);
+  setVal(wo,newWo);
+  setVal(mtd,newMtd);
+  setVal(ytd,newYtd);
+  historyBusy=false;
+  store.dispatchEvent(new Event("input",{bubbles:true}));
+  week.dispatchEvent(new Event("input",{bubbles:true}));
+  target.dispatchEvent(new Event("input",{bubbles:true}));
+  cir.dispatchEvent(new Event("input",{bubbles:true}));
+  wo.dispatchEvent(new Event("input",{bubbles:true}));
+  mtd.dispatchEvent(new Event("input",{bubbles:true}));
+  ytd.dispatchEvent(new Event("input",{bubbles:true}));
+  recalc();
+  const after=snapshot();
+  if(after!==before){
+    undoStack.push(before);
+    if(undoStack.length>100)undoStack.shift();
+    redoStack=[];
+    lastSnapshot=after;
+    resetEditSession();
+    updateHistoryButtons();
+  }
+  persistKpiDraft();
+  closeWeekSetupEditor();
+}
+
+function addEditorTripleTap(el,action){
+  if(!el)return;
+  let taps=0,timer=null;
+
+  // Count on pointer DOWN in capture phase. This is important for Store / Week:
+  // their normal single-tap keypad handler also listens to pointerdown, so the
+  // third tap must be recognised before that older handler runs.
+  el.addEventListener("pointerdown",e=>{
+    if(e.pointerType==="mouse"&&e.button!==0)return;
+    taps++;
+    clearTimeout(timer);
+
+    if(taps>=3){
+      taps=0;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      action();
+      return;
+    }
+
+    timer=setTimeout(()=>{taps=0},700);
+  },{capture:true,passive:false});
+
+  // Prevent browser double-click zoom/selection on these gesture targets.
+  el.addEventListener("dblclick",e=>{e.preventDefault();e.stopPropagation()},{passive:false});
+}
+
+addEditorTripleTap(planUnitsHeader,()=>openFigureEditor("plan"));
+addEditorTripleTap(planHoursHeader,()=>openFigureEditor("plan"));
+addEditorTripleTap(document.getElementById("unitsActualHeader"),()=>openFigureEditor("actual"));
+addEditorTripleTap(document.getElementById("hoursActualHeader"),()=>openFigureEditor("actual"));
+
+// Triple-tap the WORDS “Store No:” or “Week No:” — not the yellow entry boxes.
+// The yellow boxes keep their normal single-tap keypad behaviour.
+const storeLabel=document.getElementById("storeLabel");
+const weekLabel=document.getElementById("weekLabel");
+addEditorTripleTap(storeLabel,()=>openWeekSetupEditor("store"));
+addEditorTripleTap(weekLabel,()=>openWeekSetupEditor("week"));
+
+// App-wide protection against the browser's double-tap/double-click zoom.
+// CSS touch-action:manipulation above keeps ordinary scrolling and pinch zoom.
+document.addEventListener("dblclick",e=>{e.preventDefault()},{passive:false});
+
+function mutateEditorValue(mutator){
+  if(!editorActiveInput)return;
+  const before=editorActiveInput.value;
+  mutator(editorActiveInput);
+  if(editorActiveInput.value!==before){
+    recordEditorFieldUndo();
+    updateFigureEditorTotals();
+    updateEditorWtd();
+  }
+}
+
+function insertEditorKey(key){
+  if(!editorActiveInput)return;
+  const kind=editorInputKind(editorActiveInput);
+  if(key==="+")return;
+  if(key==="."){
+    if(!(kind==="hours"||kind==="signed-decimal"))return;
+  }
+  if(key==="-"&&kind!=="signed-decimal")return;
+  mutateEditorValue(input=>{
+    let v=input.value||"";
+    if(key==="."){
+      if(v.includes("."))return;
+      input.value=v===""?"0.":v+".";
+    }else if(key==="-"){
+      input.value=v.startsWith("-")?v.slice(1):(v?"-"+v:"-");
+    }else input.value=v+key;
+  });
+}
+
+function moveEditorInput(step){
+  const seq=editorInputSequence();
+  const idx=seq.indexOf(editorActiveInput);
+  if(idx<0)return;
+  const next=Math.max(0,Math.min(seq.length-1,idx+step));
+  if(seq[next]!==editorActiveInput)selectEditorInput(seq[next]);
+}
+
+function editorEnter(){
+  if(!editorActiveInput)return;
+
+  // In the Planned / Actual editor, Enter always travels VERTICALLY down
+  // the same column. Next remains the across/general navigation control.
+  if(editorContext==="figure"){
+    const row=editorActiveInput.closest(".fe-row");
+    const allRows=[...feRows.querySelectorAll(".fe-row")];
+    const rowIndex=allRows.indexOf(row);
+    if(rowIndex<0)return;
+
+    const selector=editorActiveInput.classList.contains("fe-hours")
+      ? ".fe-hours"
+      : ".fe-units";
+    const nextRow=allRows[rowIndex+1];
+
+    if(nextRow){
+      const nextInput=nextRow.querySelector(selector);
+      if(nextInput)selectEditorInput(nextInput);
+    }else if(selector===".fe-units"){
+      const firstHours=allRows[0]?.querySelector(".fe-hours");
+      if(firstHours)selectEditorInput(firstHours);
+      else hideEditorPad();
+    }else{
+      // Sunday Hours / final cell: finish the run.
+      hideEditorPad();
+    }
+    return;
+  }
+
+  // Week Setup keeps its simple Store -> Week -> Save flow.
+  const seq=editorInputSequence();
+  const idx=seq.indexOf(editorActiveInput);
+  if(idx<0)return;
+  if(idx<seq.length-1)selectEditorInput(seq[idx+1]);
+  else saveWeekSetup();
+}
+
+editorPad.addEventListener("pointerdown",e=>{
+  const b=e.target.closest("button");
+  if(!b)return;
+  e.preventDefault();
+  if(b.disabled)return;
+  const key=b.dataset.epKey;
+  const action=b.dataset.epAction;
+  if(key!==undefined)insertEditorKey(key);
+  else if(action==="back")mutateEditorValue(input=>input.value=input.value.slice(0,-1));
+  else if(action==="clear")mutateEditorValue(input=>input.value="");
+  else if(action==="prev")moveEditorInput(-1);
+  else if(action==="next")moveEditorInput(1);
+  else if(action==="enter")editorEnter();
+  else if(action==="done")hideEditorPad();
+});
+
+epUndo.addEventListener("pointerdown",e=>{
+  e.preventDefault();
+  if(!editorUndoStack.length)return;
+  const prev=editorUndoStack.pop();
+  applyEditorSnapshot(prev);
+});
+
+[setupStore,setupWeek,setupTarget,setupCir,setupWo,setupMtd,setupYtd].forEach(wireReadonlyEditorInput);
+
+feClose.onclick=closeFigureEditor;
+feCancel.onclick=closeFigureEditor;
+feSave.onclick=saveFigureEditor;
+setupClose.onclick=closeWeekSetupEditor;
+setupCancel.onclick=closeWeekSetupEditor;
+setupSave.onclick=saveWeekSetup;
+
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Escape")return;
+  if(figureEditor.classList.contains("show"))closeFigureEditor();
+  else if(weekSetupEditor.classList.contains("show"))closeWeekSetupEditor();
+});
+
+
+const editToast=document.getElementById("editToast");
+let editToastTimer=null;
+
+function showEditToast(message){
+  if(!editToast||!message)return;
+  clearTimeout(editToastTimer);
+  editToast.textContent=message;
+  editToast.classList.add("show");
+  editToastTimer=setTimeout(()=>editToast.classList.remove("show"),1000);
+}
+
+function describeChangedField(fromSnapshot,toSnapshot){
+  try{
+    const a=JSON.parse(fromSnapshot),b=JSON.parse(toSnapshot);
+    let idx=-1;
+    for(let n=0;n<Math.max(a.length,b.length);n++){
+      if(JSON.stringify(a[n])!==JSON.stringify(b[n])){
+        idx=n;
+        break;
+      }
+    }
+    if(idx<0)return "entry";
+
+    const el=allInputs()[idx];
+    if(!el)return "entry";
+
+    const tr=el.closest("tr");
+    const day=tr&&tr.closest("#rows")?tr.querySelector(".day-name")?.textContent?.trim():"";
+
+    let label="entry";
+    if(el.classList.contains("pu"))label="Manager Adjust Units";
+    else if(el.classList.contains("au"))label="Actual Units";
+    else if(el.classList.contains("ph"))label="Manager Adjust Hours";
+    else if(el.classList.contains("ah"))label="Actual Hours";
+    else if(el===store)label="Store No";
+    else if(el===week)label="Week No";
+    else if(el===cir)label="CIR";
+    else if(el===wo)label="Write Offs WTD";
+    else if(el===mtd)label="Prod MTD";
+    else if(el===ytd)label="Prod YTD";
+    else if(el===target)label="Target Prod";
+
+    return day?day+" "+label:label;
+  }catch(e){
+    return "entry";
+  }
+}
+
+undo.onclick=()=>{
+  if(!undoStack.length)return;
+  const current=snapshot();
+  const previous=undoStack.pop();
+  const label=describeChangedField(current,previous);
+  redoStack.push(current);
+  applySnapshot(previous);
+  showEditToast("Undid "+label);
+};
+
+redo.onclick=()=>{
+  if(!redoStack.length)return;
+  const current=snapshot();
+  const next=redoStack.pop();
+  const label=describeChangedField(current,next);
+  undoStack.push(current);
+  applySnapshot(next);
+  showEditToast("Redid "+label);
+};
+reset.onclick=()=>{
+  if(!confirm("Reset the entire KPI form?"))return;
+
+  document.body.classList.remove("publish-attempted");
+  store.classList.remove("invalid");
+  week.classList.remove("invalid");
+
+  cancelEntryMovement();
+  if(activeInput)activeInput.classList.remove("pad-active");
+  activeInput=null;
+  fastpad.classList.remove("show");
+  document.body.classList.remove("pad-open","kpi-entry-mode");
+  clearEntryRowGuide();
+  updateEntryStatus();
+  if(editToast)editToast.classList.remove("show");
+
+  allInputs().forEach(x=>{
+    setVal(x,"");
+    delete x.dataset.rawHour;
+  });
+
+  // Reset all temporary table display modes as well.
+  weekDatesVisible=false;
+  unitsDayDiffVisible=false;
+  hoursDayDiffVisible=false;
+  prodDayDiffVisible=false;
+
+  unitsActualHeader.classList.remove("hidden-toggle-on");
+  hoursActualHeader.classList.remove("hidden-toggle-on");
+  prodActualHeader.classList.remove("hidden-toggle-on");
+
+  updateWeekDates();
+  updateHiddenTableLayout();
+
+  undoStack=[];
+  redoStack=[];
+  resetEditSession();
+  lastSnapshot="";
+  recalc();
+  lastSnapshot=snapshot();
+  updateHistoryButtons();
+  clearKpiDraft();
+};
+function validStore(){let n=getVal(store).trim();return /^\d{3,4}$/.test(n)}
+function validWeek(){let n=getVal(week).trim();return /^\d{1,2}$/.test(n)&&Number(n)>=1&&Number(n)<=53}
+function validTarget(){const raw=getVal(target).trim().replace(/,/g,"");return /^\+?(?:\d+(?:\.\d*)?|\.\d+)$/.test(raw)&&Number.isFinite(Number(raw))&&Number(raw)>0}
+store.addEventListener("input",()=>{document.title=getVal(store).trim()||"KPI Build 1151";store.classList.remove("invalid")});
+week.addEventListener("input",()=>{week.classList.remove("invalid");updateWeekDates()});
+
+// Build the export from a clean cloned capture. For export only, flatten the
+// table/body values to plain text so Safari/html2canvas cannot mis-render any
+// nested KPI cell structure as a stray warning/replaced-image artefact.
+function cleanCaptureClone(doc){
+  const cloned=doc.getElementById("capture");
+  const sourceCapture=document.getElementById("capture");
+  if(!cloned||!sourceCapture)return;
+
+  cloned.querySelectorAll(".pad-active,.entry-row-active").forEach(el=>el.classList.remove("pad-active","entry-row-active"));
+
+  function flattenMatching(selector){
+    const sourceEls=[...sourceCapture.querySelectorAll(selector)];
+    const cloneEls=[...cloned.querySelectorAll(selector)];
+    cloneEls.forEach((cloneEl,i)=>{
+      const sourceEl=sourceEls[i];
+      if(!sourceEl)return;
+      const plain=(sourceEl.textContent||"").replace(/\s+/g," ").trim();
+      cloneEl.replaceChildren(doc.createTextNode(plain));
+      cloneEl.removeAttribute("style");
+    });
+  }
+
+  // Flatten all body cells in the main KPI table, including the complex Actual
+  // columns and the weekly total row.
+  flattenMatching("#kpiTable tbody td");
+
+  // Flatten Store / Week boxes in the meta strip.
+  flattenMatching(".meta .entry");
+
+  // Flatten KPI value boxes underneath the table.
+  flattenMatching("#kpiBottom .value");
+}
+
+async function makeKpiCanvas(){
+  try{if(document.fonts&&document.fonts.ready)await document.fonts.ready}catch(_){ }
+
+  // Safari occasionally corrupts a replaced/nested element while html2canvas
+  // clones the LIVE KPI sheet.  Build a clean export copy ourselves first so
+  // html2canvas never sees the live interactive cell structure.
+  const exportHost=document.createElement("div");
+  exportHost.setAttribute("aria-hidden","true");
+  exportHost.style.cssText="position:fixed;left:-20000px;top:0;width:"+capture.offsetWidth+"px;background:#fff;pointer-events:none;";
+
+  const exportCapture=capture.cloneNode(true);
+  exportCapture.id="capture-export";
+  exportCapture.style.transform="none";
+  exportCapture.style.transformOrigin="top left";
+  exportHost.appendChild(exportCapture);
+
+  // The sheet does not need pseudo-elements or image backgrounds in an export.
+  // Suppressing them prevents iOS from inserting its warning/replaced-image glyph.
+  const exportStyle=document.createElement("style");
+  exportStyle.textContent="#capture-export *,#capture-export *::before,#capture-export *::after{background-image:none!important}#capture-export *::before,#capture-export *::after{content:none!important}";
+  exportHost.appendChild(exportStyle);
+  document.body.appendChild(exportHost);
+
+  try{
+    exportCapture.querySelectorAll(".pad-active,.entry-row-active").forEach(el=>el.classList.remove("pad-active","entry-row-active"));
+
+    function flattenExport(selector){
+      const sourceEls=[...capture.querySelectorAll(selector)];
+      const exportEls=[...exportCapture.querySelectorAll(selector)];
+      exportEls.forEach((el,i)=>{
+        const source=sourceEls[i];
+        if(!source)return;
+        const plain=(source.textContent||"").replace(/\s+/g," ").trim();
+        el.replaceChildren(document.createTextNode(plain));
+        el.removeAttribute("style");
+      });
+    }
+
+    // Convert every area that contains live/nested values into plain text BEFORE
+    // html2canvas starts.  This covers Overview and Publish because both use here.
+    flattenExport("#kpiTable tbody td");
+    flattenExport(".meta .entry");
+    flattenExport("#kpiBottom .value");
+
+    // No media/replaced element is required inside the KPI sheet itself.
+    exportCapture.querySelectorAll("img,picture,source,svg,canvas,object,embed,video,audio,iframe").forEach(el=>el.remove());
+
+    // Protect against a test screenshot accidentally being circulated as real.
+    const stamp=document.createElement("div");
+    stamp.textContent="TEST VERSION — NOT FOR LIVE REPORTING";
+    stamp.style.cssText="background:#b51f32;color:white;text-align:center;font-weight:900;font-size:16px;padding:10px 4px;";
+    exportCapture.insertBefore(stamp,exportCapture.firstChild);
+
+    // Force Safari to fully lay out the sanitised copy before capture.
+    void exportCapture.offsetHeight;
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+
+    return await html2canvas(exportCapture,{
+      scale:2,
+      backgroundColor:"#fff",
+      useCORS:false,
+      allowTaint:false,
+      logging:false,
+      removeContainer:true,
+      imageTimeout:0
+    });
+  }finally{
+    exportHost.remove();
+  }
+}
+
+publish.onclick=async()=>{document.body.classList.add("publish-attempted");let storeNo=getVal(store).trim(),weekNo=getVal(week).trim(),storeOK=validStore(),weekOK=validWeek(),targetOK=validTarget();store.classList.toggle("invalid",!storeOK);week.classList.toggle("invalid",!weekOK);target.classList.toggle("invalid",!targetOK);if(!storeOK||!weekOK||!targetOK){let problems=[];if(!storeOK)problems.push(storeNo?"Store number must be 3 or 4 digits.":"Enter a store number.");if(!weekOK)problems.push(weekNo?"Week number must be between 1 and 53.":"Enter a week number.");if(!targetOK)problems.push("Enter a positive, valid productivity target.");alert("Please fix before publishing:\n\n"+problems.join("\n"));selectInput(!storeOK?store:(!weekOK?week:target));return}const bad=invalidSheetField();if(bad){bad.classList.add("invalid");alert("Check the highlighted figure. Units must be whole numbers; hours must be non-negative.");selectInput(bad);return}let b=publish,label=b.querySelector(".btn-label");b.disabled=true;if(label)label.textContent="Creating…";try{let canvas=await makeKpiCanvas(),blob=await new Promise(r=>canvas.toBlob(r,"image/png"));if(!blob)throw new Error("Export did not produce an image");let file=new File([blob],`TEST-${storeNo}.png`,{type:"image/png"});document.title=storeNo;if(navigator.canShare&&navigator.canShare({files:[file]}))await navigator.share({files:[file],title:`TEST KPI ${storeNo}`,text:`TEST KPI ${storeNo}`});else{let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=file.name;a.click()}}catch(e){if(e.name!=="AbortError")alert("Could not create the KPI image. Please try again.")}finally{b.disabled=false;if(label)label.textContent="Publish"}};
+
+
+
+
+
+
+
+const kpiBottom=document.getElementById("kpiBottom"),
+      legacyKpi=document.getElementById("legacyKpi"),
+      cirSlot=document.getElementById("cirSlot"),
+      woSlot=document.getElementById("woSlot"),
+      legacySpacer=document.getElementById("legacySpacer"),
+      mainSpacer=document.getElementById("mainSpacer"),
+      extraKpiMenu=document.getElementById("extraKpiMenu"),
+      extraKpiClose=document.getElementById("extraKpiClose"),
+      toggleCir=document.getElementById("toggleCir"),
+      toggleWo=document.getElementById("toggleWo"),
+      cirTitle=document.getElementById("cirTitle"),
+      woTitle=document.getElementById("woTitle");
+
+let showCir=false,showWo=false;
+
+function updateExtraKpis(){
+  const any=showCir||showWo;
+  kpiBottom.classList.toggle("legacy-enabled",any);
+
+  cirSlot.classList.toggle("hidden",!showCir);
+  woSlot.classList.toggle("hidden",!showWo);
+  cirSlot.setAttribute("aria-hidden",showCir?"false":"true");
+  woSlot.setAttribute("aria-hidden",showWo?"false":"true");
+
+  toggleCir.textContent=showCir?"Remove CIR":"Add CIR";
+  toggleWo.textContent=showWo?"Remove WO":"Add WO";
+  toggleCir.classList.toggle("active",showCir);
+  toggleWo.classList.toggle("active",showWo);
+
+  // Force a repaint after changing both independent slots.
+  void legacyKpi.offsetHeight;
+}
+
+function openExtraKpiMenu(){
+  extraKpiMenu.classList.add("show");
+  extraKpiMenu.setAttribute("aria-hidden","false");
+}
+function closeExtraKpiMenu(){
+  extraKpiMenu.classList.remove("show");
+  extraKpiMenu.setAttribute("aria-hidden","true");
+}
+
+function addTripleTapToWhite(el){
+  let taps=0,timer=null;
+  el.addEventListener("pointerup",e=>{
+    if(e.pointerType==="mouse"&&e.button!==0)return;
+    taps++;
+    clearTimeout(timer);
+    if(taps>=3){
+      taps=0;
+      openExtraKpiMenu();
+    }else{
+      timer=setTimeout(()=>{taps=0},700);
+    }
+  });
+}
+
+[legacySpacer,mainSpacer].forEach(addTripleTapToWhite);
+
+function addTripleTapRemove(el,type){
+  let taps=0,timer=null;
+  el.addEventListener("pointerup",e=>{
+    if(e.pointerType==="mouse"&&e.button!==0)return;
+    taps++;
+    clearTimeout(timer);
+    if(taps>=3){
+      taps=0;
+
+      const isCir=type==="CIR";
+      const currentlyVisible=isCir?showCir:showWo;
+      if(!currentlyVisible)return;
+
+      if(confirm("Remove "+type+" from the KPI sheet?")){
+        if(isCir)showCir=false;
+        else showWo=false;
+        updateExtraKpis();
+      }
+    }else{
+      timer=setTimeout(()=>{taps=0},700);
+    }
+  });
+}
+
+addTripleTapRemove(cirTitle,"CIR");
+addTripleTapRemove(woTitle,"Write Offs WTD");
+
+extraKpiClose.onclick=closeExtraKpiMenu;
+toggleCir.onclick=()=>{showCir=!showCir;updateExtraKpis()};
+toggleWo.onclick=()=>{showWo=!showWo;updateExtraKpis()};
+extraKpiMenu.addEventListener("pointerdown",e=>{if(e.target===extraKpiMenu)closeExtraKpiMenu()});
+updateExtraKpis();
+
+const weeklyProdOverview=document.getElementById("weeklyProdOverview");
+const unitsActualHeader=document.getElementById("unitsActualHeader");
+const hoursActualHeader=document.getElementById("hoursActualHeader");
+const prodActualHeader=document.getElementById("prodActualHeader");
+
+let weekDatesVisible=false;
+let unitsDayDiffVisible=false;
+let hoursDayDiffVisible=false;
+let prodDayDiffVisible=false;
+
+function ordinalDay(n){
+  const mod100=n%100;
+  if(mod100>=11&&mod100<=13)return n+"th";
+  switch(n%10){
+    case 1:return n+"st";
+    case 2:return n+"nd";
+    case 3:return n+"rd";
+    default:return n+"th";
+  }
+}
+
+function isoWeekMonday(isoYear,isoWeek){
+  const jan4=new Date(Date.UTC(isoYear,0,4));
+  const jan4Day=jan4.getUTCDay()||7;
+  const monday=new Date(jan4);
+  monday.setUTCDate(jan4.getUTCDate()-(jan4Day-1)+(isoWeek-1)*7);
+  return monday;
+}
+
+
+function fitDayDateCells(){
+  const table=document.getElementById("kpiTable");
+  const cells=[...document.querySelectorAll(".day[data-day-index]")];
+
+  table.classList.toggle("dates-mode",weekDatesVisible);
+  cells.forEach(td=>{
+    td.style.fontSize="";
+    td.classList.toggle("week-date-on",weekDatesVisible);
+  });
+
+  if(!weekDatesVisible)return;
+
+  // Keep every weekday/date exactly the same size.
+  // Shrink ALL seven together only if the longest one still needs it.
+  let size=15;
+  const minSize=11;
+  cells.forEach(td=>td.style.fontSize=size+"px");
+
+  while(size>minSize && cells.some(td=>td.scrollWidth>td.clientWidth)){
+    size-=0.5;
+    cells.forEach(td=>td.style.fontSize=size+"px");
+  }
+}
+
+function updateWeekDates(){
+  const cells=[...document.querySelectorAll(".day[data-day-index]")];
+
+  if(!weekDatesVisible){
+    cells.forEach(td=>{
+      const date=td.querySelector(".week-date");
+      if(date)date.textContent="";
+    });
+    fitDayDateCells();
+    return;
+  }
+
+  const weekNo=parseInt(getVal(week).trim(),10);
+  if(!Number.isInteger(weekNo)||weekNo<1||weekNo>53){
+    cells.forEach(td=>{
+      const date=td.querySelector(".week-date");
+      if(date)date.textContent="";
+    });
+    fitDayDateCells();
+    return;
+  }
+
+  const isoYear=new Date().getFullYear();
+  const monday=isoWeekMonday(isoYear,weekNo);
+
+  cells.forEach(td=>{
+    const i=Number(td.dataset.dayIndex)||0;
+    const d=new Date(monday);
+    d.setUTCDate(monday.getUTCDate()+i);
+    const date=td.querySelector(".week-date");
+    if(date)date.textContent=ordinalDay(d.getUTCDate());
+  });
+
+  fitDayDateCells();
+}
+
+function toggleWeekDates(){
+  const weekNo=parseInt(getVal(week).trim(),10);
+  if(!weekDatesVisible&&(!Number.isInteger(weekNo)||weekNo<1||weekNo>53)){
+    alert("Enter a valid Week No. first.");
+    return;
+  }
+  weekDatesVisible=!weekDatesVisible;
+  updateWeekDates();
+  updateHiddenTableLayout();
+}
+
+function signedBracket(n,decimals){
+  if(!Number.isFinite(n))return "";
+  return "("+(n>0?"+":"")+fmt(n,decimals)+")";
+}
+
+function paintDayDiff(el,value,decimals,positiveIsGood){
+  if(!el)return;
+  el.classList.remove("good","bad");
+  if(value===null||!Number.isFinite(value)){
+    el.textContent="";
+    return;
+  }
+  el.textContent=signedBracket(value,decimals);
+  const good=positiveIsGood ? value>=0 : value<=0;
+  el.classList.add(good?"good":"bad");
+}
+
+
+function setTableColWidths(widths){
+  const cols=[...document.querySelectorAll("#kpiTable col")];
+  widths.forEach((w,i)=>{
+    if(cols[i])cols[i].style.width=w.toFixed(4)+"%";
+  });
+}
+
+function splitPair(total,diffVisible){
+  // When the hidden difference is on, make Actual wider and borrow only
+  // from its matching Manager Adjust / Plan column.
+  if(!diffVisible)return [total/2,total/2];
+  const actual=total*0.64;
+  return [total-actual,actual];
+}
+
+function fitDiffSection(selector,enabled){
+  const wraps=[...document.querySelectorAll(selector)];
+  wraps.forEach(w=>w.style.fontSize="");
+
+  if(!enabled)return;
+
+  const populated=wraps.filter(w=>{
+    const d=w.querySelector(".day-diff");
+    return d&&d.textContent.trim()!=="";
+  });
+  if(!populated.length)return;
+
+  let size=12;
+  const minSize=9.5;
+  populated.forEach(w=>w.style.fontSize=size+"px");
+
+  while(size>minSize && populated.some(w=>w.scrollWidth>w.clientWidth)){
+    size-=0.5;
+    populated.forEach(w=>w.style.fontSize=size+"px");
+  }
+
+  // Apply the SAME size to every day in this section for visual uniformity.
+  wraps.forEach(w=>w.style.fontSize=size+"px");
+}
+
+function fitAllDifferenceSections(){
+  fitDiffSection(".units-diff-wrap",unitsDayDiffVisible);
+  fitDiffSection(".hours-diff-wrap",hoursDayDiffVisible);
+  fitDiffSection(".prod-diff-wrap",prodDayDiffVisible);
+}
+
+function updateHiddenTableLayout(){
+  const table=document.getElementById("kpiTable");
+  table.classList.toggle("dates-mode",weekDatesVisible);
+  table.classList.toggle("units-diff-mode",unitsDayDiffVisible);
+  table.classList.toggle("hours-diff-mode",hoursDayDiffVisible);
+  table.classList.toggle("prod-diff-mode",prodDayDiffVisible);
+
+  const normalDay=14.2857;
+  const normalPair=28.5714;
+
+  // Date mode receives extra room from the Units pair only.
+  const dayWidth=weekDatesVisible?18.5:normalDay;
+  const unitsPairTotal=normalPair-(dayWidth-normalDay);
+
+  const [unitsManager,unitsActual]=splitPair(unitsPairTotal,unitsDayDiffVisible);
+  const [hoursManager,hoursActual]=splitPair(normalPair,hoursDayDiffVisible);
+  const [prodPlan,prodActual]=splitPair(normalPair,prodDayDiffVisible);
+
+  // One calculation controls ALL seven columns at once.
+  setTableColWidths([
+    dayWidth,
+    unitsManager,unitsActual,
+    hoursManager,hoursActual,
+    prodPlan,prodActual
+  ]);
+
+  // Refit after the browser has applied the new widths.
+  requestAnimationFrame(()=>{
+    if(typeof fitDayDateCells==="function")fitDayDateCells();
+    fitAllDifferenceSections();
+  });
+}
+
+function refreshDailyDiffs(){
+  [...rows.rows].forEach(tr=>{
+    const puEl=tr.querySelector(".pu");
+    const auEl=tr.querySelector(".au");
+    const phEl=tr.querySelector(".ph");
+    const ahEl=tr.querySelector(".ah");
+
+    const puText=getVal(puEl).trim();
+    const auText=getVal(auEl).trim();
+    const phText=getVal(phEl).trim();
+    const ahText=getVal(ahEl).trim();
+
+    const pu=num(puText);
+    const au=num(auText);
+    const ph=hourNum(phEl);
+    const ah=hourNum(ahEl);
+
+    // Show the difference on THIS day's Actual cell only when that day's Actual has been entered.
+    const unitDiff=(unitsDayDiffVisible&&auText!=="") ? (au-pu) : null;
+    const hourDiff=(hoursDayDiffVisible&&ahText!=="") ? (ah-ph) : null;
+
+    let prodDiff=null;
+    if(prodDayDiffVisible&&auText!==""&&ahText!==""&&ph>0&&ah>0){
+      prodDiff=(au/ah)-(pu/ph);
+    }
+
+    paintDayDiff(tr.querySelector(".units-day-diff"),unitDiff,0,true);
+    paintDayDiff(tr.querySelector(".hours-day-diff"),hourDiff,2,false);
+    paintDayDiff(tr.querySelector(".prod-day-diff"),prodDiff,1,true);
+  });
+
+  requestAnimationFrame(fitAllDifferenceSections);
+}
+
+function addTripleTap(el,action){
+  let taps=0,timer=null;
+  el.addEventListener("pointerup",e=>{
+    if(e.pointerType==="mouse"&&e.button!==0)return;
+    taps++;
+    clearTimeout(timer);
+    if(taps>=3){
+      taps=0;
+      action();
+    }else{
+      timer=setTimeout(()=>{taps=0},700);
+    }
+  });
+}
+
+// Weekly Prod Overview controls the date display only.
+addTripleTap(weeklyProdOverview,toggleWeekDates);
+
+// Each Actual heading controls only its own per-day difference display.
+addTripleTap(prodActualHeader,()=>{
+  prodDayDiffVisible=!prodDayDiffVisible;
+  prodActualHeader.classList.toggle("hidden-toggle-on",prodDayDiffVisible);
+  updateHiddenTableLayout();
+  refreshDailyDiffs();
+});
+
+const prodMtdTitle=document.getElementById("prodMtdTitle"),
+      prodWidgetModal=document.getElementById("prodWidgetModal"),
+      prodWidgetClose=document.getElementById("prodWidgetClose"),
+      widgetUnitParts=[...document.querySelectorAll(".widget-units-part")],
+      widgetHourParts=[...document.querySelectorAll(".widget-hours-part")],
+      widgetTotalUnitsDisplay=document.getElementById("widgetTotalUnitsDisplay"),
+      widgetTotalHoursDisplay=document.getElementById("widgetTotalHoursDisplay"),
+      widgetManualProd=document.getElementById("widgetManualProd"),
+      widgetProdTarget=document.getElementById("widgetProdTarget"),
+      widgetHoursSave=document.getElementById("widgetHoursSave"),
+      saveWidgetProd=document.getElementById("saveWidgetProd"),
+      clearWidgetProd=document.getElementById("clearWidgetProd"),
+      grandTotalWidgetProd=document.getElementById("grandTotalWidgetProd"),
+      undoWidgetProd=document.getElementById("undoWidgetProd"),
+      redoWidgetProd=document.getElementById("redoWidgetProd"),
+      deleteWidgetProdField=document.getElementById("deleteWidgetProdField");
+
+let widgetProdSettings={unitParts:["","","",""],hourParts:["","","",""],units:null,hours:null,prod:null,target:null,hoursSave:null};
+try{
+  const saved=JSON.parse(localStorage.getItem("kpiTestV1WidgetProdSettings")||"null");
+  if(saved&&typeof saved==="object"){
+    if(Array.isArray(saved.unitParts)&&Array.isArray(saved.hourParts)){
+      widgetProdSettings=saved;
+    }else{
+      // Backwards compatibility with the previous two-box version.
+      widgetProdSettings={
+        unitParts:[saved.units??"","","",""],
+        hourParts:[saved.hours??"","","",""],
+        units:saved.units??null,
+        hours:saved.hours??null,
+        prod:saved.prod??null,
+        target:saved.target??null,
+        hoursSave:saved.hoursSave??null
+      };
+    }
+  }
+}catch(e){}
+
+function parseWidgetNumber(v){
+  const raw=String(v??"").trim().replace(/,/g,"");
+  if(!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(raw))return null;
+  const n=Number(raw);
+  return Number.isFinite(n)?n:null;
+}
+
+const widgetProdInputs=()=>[...widgetUnitParts,...widgetHourParts,widgetProdTarget];
+let widgetProdUndoStack=[],widgetProdRedoStack=[],widgetProdHistoryBusy=false,widgetProdLastSnapshot="",widgetProdActiveInput=null;
+
+function widgetProdSnapshot(){
+  return JSON.stringify(widgetProdInputs().map(i=>i.value));
+}
+function updateWidgetProdHistoryButtons(){
+  undoWidgetProd.disabled=!widgetProdUndoStack.length;
+  redoWidgetProd.disabled=!widgetProdRedoStack.length;
+}
+function applyWidgetProdSnapshot(snapshot){
+  widgetProdHistoryBusy=true;
+  const vals=JSON.parse(snapshot);
+  widgetProdInputs().forEach((i,n)=>i.value=vals[n]??"");
+  widgetProdHistoryBusy=false;
+  widgetProdLastSnapshot=snapshot;
+  calculateWidgetGrandTotal();
+  updateWidgetProdHistoryButtons();
+}
+function recordWidgetProdHistory(){
+  if(widgetProdHistoryBusy)return;
+  const now=widgetProdSnapshot();
+  if(widgetProdLastSnapshot&&now!==widgetProdLastSnapshot){
+    widgetProdUndoStack.push(widgetProdLastSnapshot);
+    if(widgetProdUndoStack.length>100)widgetProdUndoStack.shift();
+    widgetProdRedoStack=[];
+  }
+  widgetProdLastSnapshot=now;
+  updateWidgetProdHistoryButtons();
+}
+
+function totalWidgetParts(inputs){
+  let any=false,total=0;
+  inputs.forEach(i=>{
+    const n=parseWidgetNumber(i.value);
+    if(n!==null){any=true;total+=n}
+  });
+  return any?total:null;
+}
+function calculateWidgetGrandTotal(){
+  const u=totalWidgetParts(widgetUnitParts);
+  const h=totalWidgetParts(widgetHourParts);
+  const target=parseWidgetNumber(widgetProdTarget.value);
+  const p=(u!==null&&h!==null&&h>0)?u/h:null;
+  const hs=(u!==null&&h!==null&&target!==null&&target>0)?h-(u/target):null;
+
+  widgetTotalUnitsDisplay.textContent=u===null?"—":fmt(u,0);
+  widgetTotalHoursDisplay.textContent=h===null?"—":fmt(h,1);
+
+  widgetManualProd.textContent=p===null?"—":fmt(p,1);
+  widgetManualProd.style.color=(p===null||target===null)?"":p>=target?"var(--green)":"var(--red)";
+
+  widgetHoursSave.textContent=hs===null?"":(hs>0?"+":"")+fmt(hs,1);
+  widgetHoursSave.style.color=hs===null?"":hs<=0?"var(--green)":"var(--red)";
+
+  return {
+    unitParts:widgetUnitParts.map(i=>i.value.trim()),
+    hourParts:widgetHourParts.map(i=>i.value.trim()),
+    units:u,
+    hours:h,
+    prod:p,
+    target:target,
+    hoursSave:hs
+  };
+}
+function openProdWidgetSettings(){
+  const u=Array.isArray(widgetProdSettings.unitParts)?widgetProdSettings.unitParts:["","","",""];
+  const h=Array.isArray(widgetProdSettings.hourParts)?widgetProdSettings.hourParts:["","","",""];
+  widgetUnitParts.forEach((i,n)=>i.value=u[n]??"");
+  widgetHourParts.forEach((i,n)=>i.value=h[n]??"");
+  widgetProdTarget.value=widgetProdSettings.target??"";
+  widgetProdUndoStack=[];
+  widgetProdRedoStack=[];
+  widgetProdLastSnapshot=widgetProdSnapshot();
+  widgetProdActiveInput=null;
+  calculateWidgetGrandTotal();
+  updateWidgetProdHistoryButtons();
+  prodWidgetModal.classList.add("show");
+  prodWidgetModal.setAttribute("aria-hidden","false");
+}
+function closeProdWidgetSettings(){
+  prodWidgetModal.classList.remove("show");
+  prodWidgetModal.setAttribute("aria-hidden","true");
+}
+prodWidgetClose.onclick=closeProdWidgetSettings;
+
+// Everything in the hidden menu now recalculates immediately as it is typed.
+widgetProdInputs().forEach(i=>{
+  i.addEventListener("focus",()=>{widgetProdActiveInput=i});
+  i.addEventListener("input",()=>{
+    recordWidgetProdHistory();
+    calculateWidgetGrandTotal();
+  });
+});
+
+undoWidgetProd.onclick=()=>{
+  if(!widgetProdUndoStack.length)return;
+  const current=widgetProdSnapshot();
+  const previous=widgetProdUndoStack.pop();
+  widgetProdRedoStack.push(current);
+  applyWidgetProdSnapshot(previous);
+};
+redoWidgetProd.onclick=()=>{
+  if(!widgetProdRedoStack.length)return;
+  const current=widgetProdSnapshot();
+  const next=widgetProdRedoStack.pop();
+  widgetProdUndoStack.push(current);
+  applyWidgetProdSnapshot(next);
+};
+deleteWidgetProdField.onclick=()=>{
+  if(!widgetProdActiveInput){
+    alert("Tap a Units, Hours or Prod Target box first.");
+    return;
+  }
+  if(widgetProdActiveInput.value==="")return;
+  widgetProdActiveInput.value="";
+  widgetProdActiveInput.dispatchEvent(new Event("input",{bubbles:true}));
+  widgetProdActiveInput.focus();
+};
+
+// Grand Total remains as a manual refresh option, although totals now update live.
+grandTotalWidgetProd.onclick=()=>{calculateWidgetGrandTotal()};
+
+saveWidgetProd.onclick=()=>{
+  const invalid=invalidWidgetField();
+  if(invalid){alert("Correct the widget values before saving: units whole, hours non-negative, target positive.");invalid.focus();return}
+  widgetProdSettings=calculateWidgetGrandTotal();
+  try{localStorage.setItem("kpiTestV1WidgetProdSettings",JSON.stringify(widgetProdSettings))}catch(e){}
+
+  // Apply the calculated Prod MTD to the visible sheet.
+  // Reset Form can clear the visible MTD later without touching these hidden saved figures.
+  // Reopen this menu and press Save to restore the calculated MTD again.
+  if(widgetProdSettings.prod!==null){
+    setVal(mtd,widgetProdSettings.prod.toFixed(1));
+    mtd.dispatchEvent(new Event("input",{bubbles:true}));
+  }
+
+  closeProdWidgetSettings();
+};
+
+clearWidgetProd.onclick=()=>{
+  const before=widgetProdSnapshot();
+  widgetProdInputs().forEach(i=>i.value="");
+  widgetProdLastSnapshot=before;
+  recordWidgetProdHistory();
+  calculateWidgetGrandTotal();
+};
+
+let prodMtdTapCount=0,prodMtdTapTimer=null;
+prodMtdTitle.addEventListener("pointerup",e=>{
+  if(e.pointerType==="mouse"&&e.button!==0)return;
+  prodMtdTapCount++;
+  clearTimeout(prodMtdTapTimer);
+  if(prodMtdTapCount>=3){
+    prodMtdTapCount=0;
+    openProdWidgetSettings();
+  }else{
+    prodMtdTapTimer=setTimeout(()=>{prodMtdTapCount=0},700);
+  }
+});
+
+const widgetMenu=document.getElementById("widgetMenu"),widgetMenuClose=document.getElementById("widgetMenuClose"),adjustWidget=document.getElementById("adjustWidget"),kpiTitle=document.querySelector(".title");
+let titleTapCount=0,titleTapTimer=null;
+kpiTitle.addEventListener("pointerup",e=>{
+  if(e.pointerType==="mouse"&&e.button!==0)return;
+  titleTapCount++;
+  clearTimeout(titleTapTimer);
+  if(titleTapCount>=3){
+    titleTapCount=0;
+    if(activeInput)closePad();
+    widgetMenu.classList.add("show");
+    widgetMenu.setAttribute("aria-hidden","false");
+  }else{
+    titleTapTimer=setTimeout(()=>{titleTapCount=0},700);
+  }
+});
+widgetMenuClose.onclick=()=>{widgetMenu.classList.remove("show");widgetMenu.setAttribute("aria-hidden","true")};
+adjustWidget.onclick=()=>{
+  widgetMenu.classList.remove("show");
+  widgetMenu.setAttribute("aria-hidden","true");
+  recalc();
+  const params=new URLSearchParams({
+    store:getVal(store).trim(),
+    week:getVal(week).trim(),
+    planProd:(widgetProdSettings.target??widgetData.planProd)??"",
+    actualProd:(getVal(mtd).trim()!==""?num(getVal(mtd)):(widgetProdSettings.prod??widgetData.actualProd))??"",
+    widgetTotalUnits:widgetProdSettings.units??"",
+    widgetTotalHours:widgetProdSettings.hours??"",
+    unitsDiff:widgetData.unitsDiff??"",
+    hoursDiff:widgetData.hoursDiff??"",
+    hoursSave:(widgetProdSettings.hoursSave??widgetData.hoursSave)??"",
+    returnUrl:location.href
+  });
+  location.href="scriptable:///run/KPI%20WIDGET?"+params.toString().replace(/\+/g,"%20");
+};
+
+const overview=document.getElementById("overview"),overviewModal=document.getElementById("overviewModal"),overviewClose=document.getElementById("overviewClose"),overviewImage=document.getElementById("overviewImage");
+function layoutOverviewImage(){
+  const iw=overviewImage.naturalWidth||0;
+  const ih=overviewImage.naturalHeight||0;
+  if(!iw||!ih)return;
+
+  const vw=Math.max(1,window.innerWidth);
+  const vh=Math.max(1,window.innerHeight);
+  const portrait=vh>vw;
+  const landscapeImage=iw>ih;
+  const rotate=portrait&&landscapeImage;
+
+  // Leave a little breathing room for the close button and safe areas.
+  const maxW=vw*0.94;
+  const maxH=vh*0.90;
+  const scale=rotate
+    ? Math.min(maxW/ih,maxH/iw)
+    : Math.min(maxW/iw,maxH/ih);
+
+  overviewImage.style.width=Math.max(1,iw*scale)+"px";
+  overviewImage.style.height=Math.max(1,ih*scale)+"px";
+  overviewImage.style.transform=rotate?"rotate(90deg)":"none";
+  overviewModal.classList.toggle("force-landscape",rotate);
+}
+function setOverviewLandscape(){layoutOverviewImage()}
+function openOverviewFullscreen(){
+  // The fixed overlay already fills the app viewport.
+  // Avoid the browser Fullscreen API entirely because iOS standalone mode
+  // can make transformed overlay controls unreliable.
+  return Promise.resolve();
+}
+
+function closeOverviewNow(e){
+  if(e){
+    try{e.preventDefault()}catch(_){}
+    try{e.stopPropagation()}catch(_){}
+  }
+  overviewModal.classList.remove("show","force-landscape");
+  overviewModal.setAttribute("aria-hidden","true");
+  overviewImage.onload=null;
+  overviewImage.removeAttribute("src");
+  overviewImage.style.width="";
+  overviewImage.style.height="";
+  overviewImage.style.transform="";
+  document.body.style.overflow="";
+}
+
+async function closeOverviewFullscreen(){
+  closeOverviewNow();
+}
+
+overview.onclick=async()=>{
+  if(activeInput)closePad();
+  overview.disabled=true;
+  overview.textContent="Creating…";
+  try{
+    let canvas=await makeKpiCanvas();
+    overviewImage.onload=()=>requestAnimationFrame(layoutOverviewImage);
+    overviewImage.src=canvas.toDataURL("image/png");
+    overviewModal.classList.add("show");
+    overviewModal.setAttribute("aria-hidden","false");
+    document.body.style.overflow="hidden";
+    await openOverviewFullscreen();
+    requestAnimationFrame(layoutOverviewImage);
+  }catch(e){
+    alert("Could not create the overview. Please try again.");
+  }finally{
+    overview.disabled=false;
+    overview.textContent="Overview";
+  }
+};
+["touchstart","pointerdown","click"].forEach(type=>{
+  overviewClose.addEventListener(type,e=>{
+    closeOverviewNow(e);
+  },{capture:true,passive:false});
+});
+
+// Backup: tapping the black backdrop also closes Overview.
+overviewModal.addEventListener("click",e=>{
+  if(e.target===overviewModal)closeOverviewNow(e);
+});
+
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"&&overviewModal.classList.contains("show"))closeOverviewNow(e);
+});
+
+window.addEventListener("resize",()=>{if(typeof updateHiddenTableLayout==="function")updateHiddenTableLayout();if(overviewModal.classList.contains("show"))setOverviewLandscape();if(typeof keepActiveInputVisible==="function")keepActiveInputVisible()});
+window.addEventListener("orientationchange",()=>{if(overviewModal.classList.contains("show"))setTimeout(setOverviewLandscape,150)});
+const fastpad=document.getElementById("fastpad");let activeInput=null;const editableInputs=()=>allInputs();function isHours(i){return i&&(i.classList.contains("ph")||i.classList.contains("ah"))}
+function finishHour(i){if(!isHours(i))return;let raw=getVal(i).trim();if(raw===""){delete i.dataset.rawHour;return}let n=parseFloat(raw);if(Number.isFinite(n)){i.dataset.rawHour=String(n);setVal(i,String(Math.round(n)));i.dispatchEvent(new Event("input",{bubbles:true}))}}
+let entryFollowTimer=null;
+let entryWindowFrame=null;
+let entryViewportFrame=null;
+
+function cancelEntryMovement(){
+  clearTimeout(entryFollowTimer);
+  entryFollowTimer=null;
+
+  if(entryWindowFrame){
+    cancelAnimationFrame(entryWindowFrame);
+    entryWindowFrame=null;
+  }
+  if(entryViewportFrame){
+    cancelAnimationFrame(entryViewportFrame);
+    entryViewportFrame=null;
+  }
+}
+
+function easeInOutCubic(p){
+  return p<0.5 ? 4*p*p*p : 1-Math.pow(-2*p+2,3)/2;
+}
+
+function animateWindowY(targetY,duration=360){
+  if(entryWindowFrame)cancelAnimationFrame(entryWindowFrame);
+
+  const startY=window.scrollY;
+  const distance=targetY-startY;
+  if(Math.abs(distance)<2)return;
+
+  const started=performance.now();
+
+  function step(now){
+    const p=Math.min(1,(now-started)/duration);
+    const eased=easeInOutCubic(p);
+    window.scrollTo(window.scrollX,startY+(distance*eased));
+
+    if(p<1){
+      entryWindowFrame=requestAnimationFrame(step);
+    }else{
+      entryWindowFrame=null;
+    }
+  }
+
+  entryWindowFrame=requestAnimationFrame(step);
+}
+
+function animateViewportX(viewport,targetX,duration=420){
+  if(!viewport)return;
+  if(entryViewportFrame)cancelAnimationFrame(entryViewportFrame);
+
+  const startX=viewport.scrollLeft;
+  const distance=targetX-startX;
+  if(Math.abs(distance)<2)return;
+
+  const started=performance.now();
+
+  function step(now){
+    const p=Math.min(1,(now-started)/duration);
+    const eased=easeInOutCubic(p);
+    viewport.scrollLeft=startX+(distance*eased);
+
+    if(p<1){
+      entryViewportFrame=requestAnimationFrame(step);
+    }else{
+      entryViewportFrame=null;
+    }
+  }
+
+  entryViewportFrame=requestAnimationFrame(step);
+}
+
+function activeVerticalTarget(){
+  if(!activeInput||!fastpad.classList.contains("show"))return null;
+
+  const r=activeInput.getBoundingClientRect();
+  const padTop=fastpad.getBoundingClientRect().top;
+  const toolbar=document.querySelector(".toolbar");
+  const toolbarBottom=toolbar?toolbar.getBoundingClientRect().bottom:0;
+
+  const safeTop=Math.max(toolbarBottom+12,12);
+  const safeBottom=padTop-22;
+
+  if(r.bottom>safeBottom){
+    return window.scrollY+(r.bottom-safeBottom);
+  }
+  if(r.top<safeTop){
+    return Math.max(0,window.scrollY+(r.top-safeTop));
+  }
+
+  return null;
+}
+
+function activeHorizontalTarget(){
+  if(!activeInput)return null;
+
+  const viewport=activeInput.closest(".viewport")||document.querySelector(".viewport");
+  if(!viewport)return null;
+
+  const cell=activeInput.closest("td")||activeInput;
+  const vr=viewport.getBoundingClientRect();
+  const cr=cell.getBoundingClientRect();
+
+  const cellCentre=(cr.left-vr.left)+viewport.scrollLeft+(cr.width/2);
+  const maxScroll=Math.max(0,viewport.scrollWidth-viewport.clientWidth);
+  const target=Math.max(0,Math.min(maxScroll,cellCentre-(viewport.clientWidth/2)));
+
+  return {viewport,target};
+}
+
+function followActiveInputVertically(){
+  const targetY=activeVerticalTarget();
+  if(targetY!==null)animateWindowY(targetY,320);
+}
+
+function moveToNewColumn(){
+  if(!activeInput||!fastpad.classList.contains("show"))return;
+
+  const table=document.getElementById("kpiTable");
+  const toolbar=document.querySelector(".toolbar");
+
+  if(table){
+    const toolbarHeight=toolbar?toolbar.getBoundingClientRect().height:0;
+    const targetY=Math.max(
+      0,
+      window.scrollY+table.getBoundingClientRect().top-toolbarHeight-10
+    );
+    animateWindowY(targetY,420);
+  }
+
+  const horizontal=activeHorizontalTarget();
+  if(horizontal){
+    animateViewportX(horizontal.viewport,horizontal.target,460);
+  }
+}
+
+function scheduleEntryFollow(switchedColumn){
+  // This is the key change from the previous version:
+  // fast repeated navigation cancels the previous pending movement,
+  // so the screen follows the field the user STOPS on rather than every tap.
+  cancelEntryMovement();
+
+  const selected=activeInput;
+  const delay=switchedColumn ? 180 : 120;
+
+  entryFollowTimer=setTimeout(()=>{
+    entryFollowTimer=null;
+    if(!selected||activeInput!==selected)return;
+
+    if(switchedColumn){
+      moveToNewColumn();
+    }else{
+      // Within the same column, do not keep recentring horizontally.
+      // Only move if the selected row is actually going under the keypad
+      // or above the visible area.
+      followActiveInputVertically();
+    }
+  },delay);
+}
+
+// Retain this function name because resize/orientation code in the base calls it.
+function keepActiveInputVisible(){
+  scheduleEntryFollow(false);
+}
+
+function fieldGroup(el){
+  if(!el)return "";
+  if(el.classList.contains("pu"))return "pu";
+  if(el.classList.contains("ph"))return "ph";
+  if(el.classList.contains("au"))return "au";
+  if(el.classList.contains("ah"))return "ah";
+  if(el===cir)return "cir";
+  if(el===wo)return "wo";
+  if(el===mtd)return "mtd";
+  if(el===ytd)return "ytd";
+  if(el===target)return "target";
+  return "";
+}
+
+
+function entryFieldLabel(el){
+  if(!el)return "";
+  if(el.classList.contains("pu"))return "Manager Adjust Units";
+  if(el.classList.contains("au"))return "Actual Units";
+  if(el.classList.contains("ph"))return "Manager Adjust Hours";
+  if(el.classList.contains("ah"))return "Actual Hours";
+  if(el===store)return "Store No";
+  if(el===week)return "Week No";
+  if(el===cir)return "CIR";
+  if(el===wo)return "Write Offs WTD";
+  if(el===mtd)return "Prod MTD";
+  if(el===ytd)return "Prod YTD";
+  if(el===target)return "Target Prod";
+  return "";
+}
+
+function entryDayInfo(el){
+  if(el===store)return {label:"Store Number",progress:""};
+  if(el===week)return {label:"Week Number",progress:""};
+  const tr=el?.closest("tr");
+  if(!tr||!tr.closest("#rows"))return {label:"KPI",progress:""};
+
+  const day=tr.querySelector(".day-name")?.textContent?.trim()||"";
+  const date=tr.querySelector(".week-date")?.textContent?.trim()||"";
+  const index=[...rows.rows].indexOf(tr);
+
+  return {
+    label:(day+(date?" "+date:"")).trim(),
+    progress:index>=0?"Day "+(index+1)+" / 7":""
+  };
+}
+
+function updateEntryStatus(){
+  const dayEl=document.getElementById("entryStatusDay");
+  const fieldEl=document.getElementById("entryStatusField");
+  const valueEl=document.getElementById("entryStatusValue");
+  const progressEl=document.getElementById("entryStatusProgress");
+  if(!dayEl||!fieldEl||!valueEl||!progressEl)return;
+
+  if(!activeInput){
+    dayEl.textContent="—";
+    fieldEl.textContent="—";
+    valueEl.textContent="—";
+    progressEl.textContent="";
+    return;
+  }
+
+  const info=entryDayInfo(activeInput);
+  const raw=getVal(activeInput).trim();
+
+  dayEl.textContent=info.label;
+  fieldEl.textContent=(activeInput===store||activeInput===week)?"":entryFieldLabel(activeInput);
+  valueEl.textContent=raw||"—";
+  progressEl.textContent=info.progress;
+}
+
+function clearEntryRowGuide(){
+  document.querySelectorAll("#rows tr.entry-row-active")
+    .forEach(tr=>tr.classList.remove("entry-row-active"));
+}
+
+function updateEntryRowGuide(){
+  clearEntryRowGuide();
+  const tr=activeInput?.closest("tr");
+  if(tr&&tr.closest("#rows"))tr.classList.add("entry-row-active");
+}
+
+function scrollToTopOfSelectedColumn(){
+  moveToNewColumn();
+}
+
+function setKpiEntryMode(i,preservePosition=true){
+  const collapse=!!i && i!==store && i!==week;
+  const wasCollapsed=document.body.classList.contains("kpi-entry-mode");
+  if(collapse===wasCollapsed)return;
+
+  const beforeTop=(preservePosition&&i)?i.getBoundingClientRect().top:null;
+  document.body.classList.toggle("kpi-entry-mode",collapse);
+
+  // Removing/restoring the header changes the page height. Offset that change
+  // immediately so the selected box stays in the same visual position.
+  if(beforeTop!==null){
+    const afterTop=i.getBoundingClientRect().top;
+    const shift=afterTop-beforeTop;
+    if(Math.abs(shift)>1){
+      window.scrollBy({top:shift,left:0,behavior:"auto"});
+    }
+  }
+}
+
+function selectInput(i){
+  if(!i)return;
+
+  const previousInput=activeInput;
+  const switchedColumn=previousInput &&
+                       previousInput!==i &&
+                       fieldGroup(previousInput)!==fieldGroup(i) &&
+                       ["pu","ph","au","ah"].includes(fieldGroup(previousInput)) &&
+                       ["pu","ph","au","ah"].includes(fieldGroup(i));
+
+  if(activeInput&&activeInput!==i){
+    finishHour(activeInput);
+    activeInput.classList.remove("pad-active");
+  }
+
+  activeInput=i;
+  beginEditSession(i);
+
+  if(isHours(i)&&i.dataset.rawHour)setVal(i,i.dataset.rawHour);
+
+  // Give immediate visual feedback before doing any layout/scroll work.
+  i.classList.add("pad-active");
+  fastpad.classList.add("show");
+  document.body.classList.add("pad-open");
+  updateEntryStatus();
+  updateEntryRowGuide();
+
+  // Header collapse + scroll require layout and were making the pointer-down
+  // handler noticeably slow on iPhone. Let the active highlight + keypad paint
+  // FIRST, then do that layout work on the following frame.
+  cancelEntryMovement();
+  const selectedNow=i;
+  requestAnimationFrame(()=>{
+    if(activeInput!==selectedNow)return;
+    requestAnimationFrame(()=>{
+      if(activeInput!==selectedNow)return;
+      setKpiEntryMode(selectedNow,true);
+      if(!previousInput){
+        followActiveInputVertically();
+      }else{
+        // Navigation after the keypad is open stays coalesced so rapid
+        // Next/Enter presses do not make the sheet chase every field.
+        scheduleEntryFollow(switchedColumn);
+      }
+    });
+  });
+}
+function showEntryReview(){
+  const totalRow=document.querySelector("#kpiTable tr.total");
+  const viewport=document.querySelector(".viewport");
+
+  requestAnimationFrame(()=>{
+    if(viewport)viewport.scrollLeft=0;
+    if(!totalRow)return;
+
+    const toolbar=document.querySelector(".toolbar");
+    const toolbarHeight=toolbar?toolbar.getBoundingClientRect().height:0;
+    const targetY=window.scrollY+totalRow.getBoundingClientRect().top-toolbarHeight-10;
+
+    animateWindowY(Math.max(0,targetY),380);
+  });
+}
+
+function closePad(review=false){
+  cancelEntryMovement();
+  if(activeInput){
+    finishHour(activeInput);
+    activeInput.classList.remove("pad-active");
+  }
+  activeInput=null;
+  resetEditSession();
+  fastpad.classList.remove("show");
+  document.body.classList.remove("pad-open","kpi-entry-mode");
+  clearEntryRowGuide();
+  updateEntryStatus();
+
+  if(review)showEntryReview();
+}
+// One capture-phase handler makes sheet boxes react at pointer-down immediately
+// and avoids dozens of competing per-cell listeners.
+const captureSheet=document.getElementById("capture");
+captureSheet.addEventListener("pointerdown",e=>{
+  const i=e.target.closest?.(".field");
+  if(!i||!captureSheet.contains(i))return;
+  e.preventDefault();
+  selectInput(i);
+},{capture:true,passive:false});
+function fire(){if(activeInput&&isHours(activeInput)){const v=getVal(activeInput).trim();if(v==="")delete activeInput.dataset.rawHour;else{const n=parseFloat(v);if(Number.isFinite(n))activeInput.dataset.rawHour=String(n)}}activeInput?.dispatchEvent(new Event("input",{bubbles:true}));updateEntryStatus()}
+function insertKey(k){if(!activeInput)return;if(k==="."&&(activeInput.classList.contains("pu")||activeInput.classList.contains("au")))return;if((k==="-"||k==="+")&&activeInput.closest("#rows"))return;let v=getVal(activeInput);if(k==="-")setVal(activeInput,v.startsWith("-")?v.slice(1):"-"+v.replace(/^\+/,""));else if(k==="+")setVal(activeInput,v.startsWith("+")?v.slice(1):"+"+v.replace(/^-/,""));else if(k==="."){if(!v.replace(/[+\-%]/g,"").includes("."))setVal(activeInput,v+(v===""?"0.":"."))}else setVal(activeInput,v+k);fire()}
+function move(d){if(!activeInput)return;finishHour(activeInput);let a=editableInputs(),i=a.indexOf(activeInput);selectInput(a[Math.max(0,Math.min(a.length-1,i+d))])}
+fastpad.addEventListener("pointerdown",e=>{let b=e.target.closest("button");if(!b)return;e.preventDefault();if(b.dataset.key!==undefined)insertKey(b.dataset.key);else if(b.dataset.action==="back"&&activeInput){setVal(activeInput,getVal(activeInput).slice(0,-1));fire()}else if(b.dataset.action==="clear"&&activeInput){setVal(activeInput,"");delete activeInput.dataset.rawHour;fire()}else if(b.dataset.action==="prev")move(-1);else if(b.dataset.action==="next")move(1);else if(b.dataset.action==="enter"){if(activeInput){finishHour(activeInput);let order=[...document.querySelectorAll(".pu"),...document.querySelectorAll(".ph"),...document.querySelectorAll(".au"),...document.querySelectorAll(".ah"),cir,wo,mtd,ytd,target],i=order.indexOf(activeInput);i>=0&&i<order.length-1?selectInput(order[i+1]):closePad()}}else if(b.dataset.action==="done")closePad(true)});
+allInputs().forEach(x=>{setVal(x,"");delete x.dataset.rawHour});loadKpiDraft();recalc();lastSnapshot=snapshot();updateHistoryButtons();
+</script></body></html>
