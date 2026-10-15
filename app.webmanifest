@@ -1,0 +1,19 @@
+{
+  "name": "KPI",
+  "short_name": "KPI",
+  "description": "KPI weekly productivity and availability tracking",
+  "id": "/KPI-APP/",
+  "start_url": "/KPI-APP/",
+  "scope": "/KPI-APP/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#075b9d",
+  "icons": [
+    {
+      "src": "./5E70CE34-CDF8-4395-B3A3-71760064D3CD.png?icon=v43",
+      "type": "image/png",
+      "sizes": "any",
+      "purpose": "any"
+    }
+  ]
+}
