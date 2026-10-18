@@ -1234,7 +1234,7 @@ function calculateMatchedProductivity(entries){
       plannedUnits+=e.pu;
       plannedHours+=e.ph;
     }
-    const hasEffectiveUnits=e.hasAU||e.hasPU;
+    const hasEffectiveUnits=e.hasAU&&e.hasAH;
     const hasEffectiveHours=e.hasAH||e.hasPH;
     const effectiveHours=e.hasAH?e.ah:e.ph;
     if(hasEffectiveUnits&&hasEffectiveHours&&effectiveHours>0){
